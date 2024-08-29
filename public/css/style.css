@@ -1,0 +1,7 @@
+/* Basic styling for the application */
+body {
+  background-color: #f8f9fa;
+}
+.container {
+  max-width: 900px;
+}
