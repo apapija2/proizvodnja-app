@@ -12,6 +12,39 @@ app.use('/api/product', productRoute);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+// API rute
+const productRoutes = require('./routes/product');
+app.use('/api/product', productRoutes);
+
+// Rute za HTML datoteke
+app.get('/tehnicka-priprema', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'tehnicka-priprema.html'));
+});
+
+app.get('/staklo', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'staklo.html'));
+});
+
+app.get('/cnc', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'cnc.html'));
+});
+
+app.get('/farbara', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'farbara.html'));
+});
+
+app.get('/aplikacija-wj', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'aplikacija-wj.html'));
+});
+
+app.get('/ljepljenje', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'ljepljenje.html'));
+});
+
+app.get('/zavrsavanje', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'zavrsavanje.html'));
+});
+
 
 // Serve views
 app.get('/login', (req, res) => {
@@ -33,3 +66,7 @@ mongoose
   .catch((err) => console.error('Connection error', err));
 
 app.listen(3000, () => console.log('Server running on port 3000'));
+
+
+
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Pregled stanja proizvodnje</h2>
+    <div id="productTable" class="table-responsive">
+      <table class="table table-bordered table-hover table-sm">
+        <thead>
+          <tr>
+            <th>Šifra proizvoda</th>
+            <th>Datum narudžbe</th>
+            <th>Ime kupca</th>
+            <th>Mjesto kupca</th>
+            <th>Materijal "vani"</th>
+            <th>Boja "vani"</th>
+            <th>Materijal "unutra"</th>
+            <th>Boja unutra</th>
+            <th>Aplikacija</th>
+            <th>Model</th>
+            <th>Staklo</th>
+            <th>Dimenzije</th>
+            <th>Količina</th>
+            <th>Napomena</th>
+            <th>Izvedba</th>
+            <th>Status tehničke pripreme</th>
+            <th>Status CNC</th>
+            <th>Status farbara</th>
+            <th>Status aplikacija_wj</th>
+            <th>Status staklo</th>
+            <th>Status ljepljenje</th>
+            <th>Status završavanje</th>
+            <th>Progres (%)</th>
+          </tr>
+        </thead>
+        <tbody id="productData">
+          <!-- Rows will be populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
