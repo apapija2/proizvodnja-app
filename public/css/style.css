@@ -89,3 +89,11 @@ h2 {
 .dropdown-menu {
   min-width: 200px;
 }
+
+.form-control {
+  margin-bottom: 15px;
+}
+
+.btn-primary {
+  margin-top: 10px;
+}

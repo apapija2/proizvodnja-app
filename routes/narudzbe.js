@@ -3,7 +3,7 @@ const router = express.Router();
 const Narudzba = require('../models/Narudzba');
 
 // Ruta za dodavanje nove narudžbe
-router.post('/narudzba', async (req, res) => {
+router.post('/', async (req, res) => {
   const {
     sifraProizvoda,
     datumNarudzbe,
@@ -46,7 +46,7 @@ router.post('/narudzba', async (req, res) => {
 });
 
 // Ruta za dohvaćanje svih narudžbi
-router.get('/narudzbe', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const narudzbe = await Narudzba.find()
       .populate('kupac')
