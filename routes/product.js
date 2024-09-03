@@ -11,6 +11,18 @@ router.post('/', verifyToken, authorizeRole(['prodaja']), async (req, res) => {
     res.send('Proizvod dodan');
 });
 
+
+// Ruta za dodavanje proizvoda
+router.post('/', async (req, res) => {
+    const { sifraProizvoda, imeProizvoda } = req.body;
+    try {
+      const noviProizvod = new Product({ sifraProizvoda, imeProizvoda });
+      await noviProizvod.save();
+      res.status(201).json(noviProizvod);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  });
 // Dohvaćanje svih proizvoda (za dashboard)
 router.get('/', verifyToken, async (req, res) => {
     const products = await Product.find();
@@ -18,15 +30,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Ažuriranje statusa tehničke pripreme
-router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), async (req, res) => {
-    const { status, zavrseno } = req.body;
-    const product = await Product.findByIdAndUpdate(
-        req.params.id,
-        { 'tehnickaPriprema.status': status, 'tehnickaPriprema.zavrseno': zavrseno },
-        { new: true }
-    );
-    res.json(product);
-});
+
 
 router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), async (req, res) => {
     const { status, zavrseno } = req.body;
@@ -109,5 +113,38 @@ router.put('/:id/zavrsavanje', verifyToken, authorizeRole(['zavrsavanje']), asyn
     );
     res.json(product);
 });
+
+router.get('/', verifyToken, async (req, res) => {
+    try {
+      const products = await Product.find();
+  
+      const updatedProducts = products.map(product => {
+        // Izračunaj postotak za svaki dio proizvodnje
+        const tehnickaPripremaPercentage = Math.round((product.tehnickaPriprema.zavrseno / product.kolicina) * 100) || 0;
+        const cncPercentage = Math.round((product.cnc.zavrseno / product.kolicina) * 100) || 0;
+        const farbaraPercentage = Math.round((product.farbara.zavrseno / product.kolicina) * 100) || 0;
+        const aplikacijaWjPercentage = Math.round((product.aplikacijaWj.zavrseno / product.kolicina) * 100) || 0;
+        const stakloPercentage = Math.round((product.staklo.zavrseno / product.kolicina) * 100) || 0;
+        const ljepljenjePercentage = Math.round((product.ljepljenje.zavrseno / product.kolicina) * 100) || 0;
+        const zavrsavanjePercentage = Math.round((product.zavrsavanje.zavrseno / product.kolicina) * 100) || 0;
+  
+        return {
+          ...product._doc,
+          tehnickaPripremaPercentage,
+          cncPercentage,
+          farbaraPercentage,
+          aplikacijaWjPercentage,
+          stakloPercentage,
+          ljepljenjePercentage,
+          zavrsavanjePercentage,
+        };
+      });
+  
+      res.json(updatedProducts);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
 
 module.exports = router;

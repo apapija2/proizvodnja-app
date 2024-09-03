@@ -1,0 +1,43 @@
+<%- include('layout', { title: 'Narudžbe' }) %>
+
+<h1>Dodaj novu narudžbu</h1>
+
+<form action="/narudzba" method="POST">
+  <div class="form-group">
+    <label for="sifraProizvoda">Šifra proizvoda:</label>
+    <input type="text" id="sifraProizvoda" name="sifraProizvoda" class="form-control" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="datumNarudzbe">Datum narudžbe:</label>
+    <input type="date" id="datumNarudzbe" name="datumNarudzbe" class="form-control" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="kupac">Kupac:</label>
+    <select id="kupac" name="kupac" class="form-control">
+      <% kupci.forEach(kupac => { %>
+        <option value="<%= kupac._id %>"><%= kupac.ime %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <!-- Ostali dropdown meniji za ostale šifrante -->
+
+  <div class="form-group">
+    <label for="dimenzije">Dimenzije:</label>
+    <input type="text" id="dimenzije" name="dimenzije" class="form-control" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="kolicina">Količina:</label>
+    <input type="number" id="kolicina" name="kolicina" class="form-control" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="napomena">Napomena:</label>
+    <textarea id="napomena" name="napomena" class="form-control"></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3">Kreiraj narudžbu</button>
+</form>
