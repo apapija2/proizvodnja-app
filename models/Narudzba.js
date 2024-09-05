@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const NarudzbaSchema = new mongoose.Schema({
-  sifraProizvoda: { type: String, required: true },
+  sifraProizvoda: { type: String, required: true, unique: true },
   datumNarudzbe: { type: Date, required: true },
+  planiraniZavrsetak: { type: Date, required: true },
   kupac: { type: mongoose.Schema.Types.ObjectId, ref: 'Kupac', required: true },
   mjestoKupca: { type: mongoose.Schema.Types.ObjectId, ref: 'Mjesto', required: true },
   materijalVani: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterijalVani', required: true },
@@ -15,6 +16,19 @@ const NarudzbaSchema = new mongoose.Schema({
   dimenzije: { type: String, required: true },
   kolicina: { type: Number, required: true },
   napomena: { type: String },
-});
+  izvedba: { type: String },
+  statusTehnickaPriprema: { type: String, default: 'Nije u izvedbi' },
+  statusCNC: { type: String, default: 'Nije u izvedbi' },
+  statusFarbara: { type: String, default: 'Nije u izvedbi' },
+  statusAplikacijaWJ: { type: String, default: 'Nije u izvedbi' },
+  statusStaklo: { type: String, default: 'Nije u izvedbi' },
+  statusLjepljenje: { type: String, default: 'Nije u izvedbi' },
+  statusZavrsavanje: { type: String, default: 'Nije u izvedbi' },
+  status: { 
+    type: String, 
+    enum: ['Nije prihvaćeno', 'Na čekanju', 'Prihvaćeno'], 
+    default: 'Na čekanju' 
+  },
+}, { collection: 'products' });  // Ovo definira ime kolekcije "products"
 
 module.exports = mongoose.model('Narudzba', NarudzbaSchema);
