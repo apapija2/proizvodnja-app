@@ -4,7 +4,7 @@ const authRoute = require('./routes/auth');
 const productRoute = require('./routes/product');
 const sifrantiRoute = require('./routes/sifranti'); // Šifranti rute
 const narudzbeRoute = require('./routes/narudzbe');
-
+const Narudzba = require('./models/Narudzba');
 const Kupac = require('./models/Kupac');
 const Mjesto = require('./models/Mjesto');
 const MaterijalVani = require('./models/MaterijalVani');
@@ -26,8 +26,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));  // Provjerite da je ovo ispravan put
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
+app.use('/', authRoute);
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -52,37 +53,7 @@ app.get('/staklo', (req, res) => {
 app.get('/cnc', (req, res) => {
   res.render('cnc');
 });
-app.get('/narudzbe', async (req, res) => {
-  try {
-    // Dohvaćanje svih narudžbi iz baze
-    const narudzbe = await Narudzba.find()
-      .populate('kupac')
-      .populate('mjestoKupca')
-      .populate('materijalVani')
-      .populate('bojaVani')
-      .populate('materijalUnutra')
-      .populate('bojaUnutra')
-      .populate('aplikacija')
-      .populate('model')
-      .populate('staklo');
 
-    // Prosljeđujemo varijablu narudzbe u EJS datoteku
-    res.render('narudzbe', { 
-      narudzbe, // Prosljeđujemo popis narudžbi
-      kupci: await Kupac.find(),
-      mjesta: await Mjesto.find(),
-      materijaliVani: await MaterijalVani.find(),
-      bojeVani: await BojaVani.find(),
-      materijaliUnutra: await MaterijalUnutra.find(),
-      bojeUnutra: await BojaUnutra.find(),
-      aplikacije: await Aplikacija.find(),
-      modeli: await Model.find(),
-      stakla: await Staklo.find(),
-    });
-  } catch (error) {
-    res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
-  }
-});
 
 
 
@@ -108,7 +79,7 @@ app.get('/login', (req, res) => {
   res.render('login');
 });
 
-app.get('/narudzbe', async (req, res, next) => {
+app.get('/narudzbe', async (req, res) => {
   try {
     const narudzbe = await Narudzba.find()
       .populate('kupac')
@@ -120,20 +91,63 @@ app.get('/narudzbe', async (req, res, next) => {
       .populate('aplikacija')
       .populate('model')
       .populate('staklo');
+
+    const kupci = await Kupac.find();
+    const mjesta = await Mjesto.find();
+    const materijaliVani = await MaterijalVani.find();
+    const bojeVani = await BojaVani.find();
+    const materijaliUnutra = await MaterijalUnutra.find();
+    const bojeUnutra = await BojaUnutra.find();
+    const aplikacije = await Aplikacija.find();
+    const modeli = await Model.find();
+    const stakla = await Staklo.find();
+
     res.render('narudzbe', { 
       narudzbe, 
-      kupci: await Kupac.find(),
-      mjesta: await Mjesto.find(),
-      materijaliVani: await MaterijalVani.find(),
-      bojeVani: await BojaVani.find(),
-      materijaliUnutra: await MaterijalUnutra.find(),
-      bojeUnutra: await BojaUnutra.find(),
-      aplikacije: await Aplikacija.find(),
-      modeli: await Model.find(),
-      stakla: await Staklo.find(),
+      kupci, 
+      mjesta, 
+      materijaliVani, 
+      bojeVani, 
+      materijaliUnutra, 
+      bojeUnutra, 
+      aplikacije, 
+      modeli, 
+      stakla 
     });
   } catch (error) {
-    next(error);  // Prosljeđivanje greške Expressovom error handleru
+    console.error("Greška pri dohvaćanju narudžbi: ", error.message);
+    res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
+  }
+});
+
+app.post('/narudzbe', async (req, res) => {
+  try {
+    const { datumNarudzbe, planiratniZavrsetak, imeKupca, mjestoKupca, materijalVani, bojaVani, materijalUnutra, bojaUnutra, aplikacija, model, staklo, dimenzije, kolicina, napomena, izvedba, status } = req.body;
+
+    const novaNarudzba = new Narudzba({
+      datumNarudzbe,
+      planiratniZavrsetak,
+      imeKupca,
+      mjestoKupca,
+      materijalVani,
+      bojaVani,
+      materijalUnutra,
+      bojaUnutra,
+      aplikacija,
+      model,
+      staklo,
+      dimenzije,
+      kolicina,
+      napomena,
+      izvedba,
+      status
+    });
+
+    await novaNarudzba.save();
+    res.redirect('/narudzbe'); // Nakon unosa preusmjerava na listu narudžbi
+  } catch (error) {
+    console.error("Greška pri unosu narudžbe: ", error.message);
+    res.status(500).send('Greška pri unosu narudžbe');
   }
 });
 
@@ -168,22 +182,18 @@ app.post('/sifrant-kupac', async (req, res) => {
 });
 
 // Ruta za šifrant mjesto (GET)
-app.post('/sifrant-mjesto', async (req, res) => {
+app.get('/sifrant-mjesto', async (req, res) => {
   try {
-    console.log(req.body);  // Provjerite dolazne podatke
-    const postojiMjesto = await Mjesto.findOne({ naziv: req.body.naziv });
-    if (postojiMjesto) {
-      return res.status(400).send('Mjesto s ovim nazivom već postoji!');
-    }
-
-    const novoMjesto = new Mjesto({ naziv: req.body.naziv });
-    await novoMjesto.save();
-    res.redirect('/sifrant-mjesto');
+    const mjesta = await Mjesto.find();
+    res.render('sifrant-mjesto', { mjesta });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Greška pri dodavanju mjesta');
+    console.error("Greška pri dohvaćanju mjesta: ", error);  // Ispisuje detalje greške
+    res.status(500).send('Greška pri dohvaćanju mjesta');
   }
 });
+
+
+  
 
 
 

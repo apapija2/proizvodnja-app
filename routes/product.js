@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+const Product = require('../models/Narudzba');
 const verifyToken = require('../middleware/verifyToken');
 const authorizeRole = require('../middleware/authorizeRole');
 
 // Dodavanje novog proizvoda (samo prodaja)
-router.post('/', verifyToken, authorizeRole(['prodaja']), async (req, res) => {
+router.post('/',async (req, res) => {
     const product = new Product(req.body);
     await product.save();
     res.send('Proizvod dodan');
 });
 
 
-// Ruta za dodavanje proizvoda
+// Ruta za dodavanje proizvodaS
 router.post('/', async (req, res) => {
     const { sifraProizvoda, imeProizvoda } = req.body;
     try {

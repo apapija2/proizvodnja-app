@@ -39,18 +39,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td>${product.sifraProizvoda}</td>
             <td>${new Date(product.datumNarudzbe).toLocaleDateString()}</td>
             <td>${product.imeKupca}</td>
-            <td>${product.mjestoKupca}</td>
-            <td>${product.materijalVani}</td>
-            <td>${product.bojaVani}</td>
-            <td>${product.materijalUnutra}</td>
-            <td>${product.bojaUnutra}</td>
-            <td>${product.aplikacija}</td>
-            <td>${product.model}</td>
-            <td>${product.staklo}</td>
-            <td>${product.dimenzije}</td>
-            <td>${product.kolicina}</td>
-            <td>${product.napomena}</td>
-            <td>${product.izvedba}</td>
+            <td>${product.mjestoKupca?.naziv || 'N/A'}</td>
+
             <td>${product.tehnickaPriprema?.status || 'N/A'} / ${tehnickaPripremaPercentage}% gotovo</td>
             <td>${product.cnc?.status || 'N/A'} / ${cncPercentage}% gotovo</td>
             <td>${product.farbara?.status || 'N/A'} / ${farbaraPercentage}% gotovo</td>
