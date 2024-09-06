@@ -2,6 +2,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f9;
   color: #333;
+  font-size: 12px;
 }
 
 .container {
@@ -76,4 +77,23 @@ h2 {
   width: 80%;
   margin-left: auto;
   margin-right: auto;
+}
+.navbar-brand {
+  font-weight: bold;
+}
+
+.container {
+  padding-top: 50px;
+}
+
+.dropdown-menu {
+  min-width: 200px;
+}
+
+.form-control {
+  margin-bottom: 15px;
+}
+
+.btn-primary {
+  margin-top: 10px;
 }

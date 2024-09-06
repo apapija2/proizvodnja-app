@@ -19,7 +19,7 @@ document
     if (response.ok) {
       const token = await response.text();
       localStorage.setItem('token', token);
-      window.location.href = '/dashboard';
+      window.location.href = '/index.html';
     } else {
       alert('Neispravni podaci. Pokušajte ponovo.');
     }

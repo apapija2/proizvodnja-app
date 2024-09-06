@@ -1,39 +1,48 @@
-document
-  .getElementById('productForm')
-  .addEventListener('submit', async function (e) {
-    e.preventDefault();
+const express = require('express');
+const router = express.Router();
 
-    const productData = {
-      sifraProizvoda: document.getElementById('sifraProizvoda').value,
-      datumNarudzbe: document.getElementById('datumNarudzbe').value,
-      imeKupca: document.getElementById('imeKupca').value,
-      mjestoKupca: document.getElementById('mjestoKupca').value,
-      materijalVani: document.getElementById('materijalVani').value,
-      bojaVani: document.getElementById('bojaVani').value,
-      materijalUnutra: document.getElementById('materijalUnutra').value,
-      bojaUnutra: document.getElementById('bojaUnutra').value,
-      aplikacija: document.getElementById('aplikacija').value,
-      model: document.getElementById('model').value,
-      staklo: document.getElementById('staklo').value,
-      dimenzije: document.getElementById('dimenzije').value,
-      kolicina: document.getElementById('kolicina').value,
-      napomena: document.getElementById('napomena').value,
-      izvedba: document.getElementById('izvedba').value,
-    };
+const Kupac = require('../models/Kupac');
+const Mjesto = require('../models/Mjesto');
+const MaterijalVani = require('../models/MaterijalVani');
+const BojaVani = require('../models/BojaVani');
+const MaterijalUnutra = require('../models/MaterijalUnutra');
+const BojaUnutra = require('../models/BojaUnutra');
+const Aplikacija = require('../models/Aplikacija');
+const Model = require('../models/Model');
+const Staklo = require('../models/Staklo');
 
-    const response = await fetch('/api/product', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('token'),
-      },
-      body: JSON.stringify(productData),
-    });
-
-    if (response.ok) {
-      alert('Proizvod uspješno dodan!');
-      document.getElementById('productForm').reset();
-    } else {
-      alert('Došlo je do greške. Pokušajte ponovo.');
+// Generiranje ruta za svaki šifrant
+const createRoutesForModel = (model, modelName) => {
+  router.post(`/sifrant-${modelName}`, async (req, res) => {
+    const { naziv } = req.body;
+    try {
+      const novaStavka = new model({ naziv });
+      await novaStavka.save();
+      res.status(201).json(novaStavka);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
   });
+
+  router.get(`/sifrant-${modelName}`, async (req, res) => {
+    try {
+      const stavke = await model.find();
+      res.json(stavke);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+};
+
+// Kreiranje ruta za sve šifrante
+createRoutesForModel(Kupac, 'kupac');
+createRoutesForModel(Mjesto, 'mjesto');
+createRoutesForModel(MaterijalVani, 'materijal-vani');
+createRoutesForModel(BojaVani, 'boja-vani');
+createRoutesForModel(MaterijalUnutra, 'materijal-unutra');
+createRoutesForModel(BojaUnutra, 'boja-unutra');
+createRoutesForModel(Aplikacija, 'aplikacija');
+createRoutesForModel(Model, 'model');
+createRoutesForModel(Staklo, 'staklo');
+
+module.exports = router;

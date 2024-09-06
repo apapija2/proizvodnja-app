@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kupac</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/proizvodnja.css"> <!-- Koristi proizvodnja.css -->
+</head>
+<body>
+  <div class="container">
+    <div class="centered-box">
+      <h3 class="text-center mb-4">Kupac</h3>
+
+      <form action="/sifrant-kupac" method="POST">
+        <div class="mb-3">
+          <label for="nazivKupca" class="form-label">Naziv kupca</label>
+          <input type="text" class="form-control" id="nazivKupca" name="naziv" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Spremi kupca</button>
+      </form>
+      <h5 class="mt-5">Popis kupaca</h5>
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Naziv</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% kupci.forEach(function(kupac) { %>
+            <tr>
+              <td><%= kupac.naziv %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

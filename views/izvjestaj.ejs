@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Izvještaj za narudžbu <%= narudzba.sifraProizvoda %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+  @media print {
+    body {
+      background-color: white;
+      color: black;
+    }
+  
+    .container {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+  
+    th, td {
+      padding: 10px;
+      border: 1px solid black;
+    }
+  
+    button {
+      display: none;
+    }
+  }
+  </style>
+</head>
+<body>
+    <div class="container mt-5">
+      <h2 class="mb-4">Izvještaj za narudžbu <%= narudzba.sifraProizvoda %></h2>
+  
+      <table class="table table-bordered">
+        <tr>
+          <th>Šifra Proizvoda</th>
+          <td><%= narudzba.sifraProizvoda %></td>
+        </tr>
+        <tr>
+          <th>Datum Narudžbe</th>
+          <td><%= narudzba.datumNarudzbe.toDateString() %></td>
+        </tr>
+        <tr>
+          <th>Planirani Završetak</th>
+          <td><%= narudzba.planiraniZavrsetak.toDateString() %></td>
+        </tr>
+        <tr>
+          <th>Kupac</th>
+          <td><%= narudzba.kupac.naziv %></td>
+        </tr>
+        <tr>
+          <th>Mjesto Kupca</th>
+          <td><%= narudzba.mjestoKupca.naziv %></td>
+        </tr>
+        <tr>
+          <th>Materijal "Vani"</th>
+          <td><%= narudzba.materijalVani.naziv %></td>
+        </tr>
+        <tr>
+          <th>Boja "Vani"</th>
+          <td><%= narudzba.bojaVani.naziv %></td>
+        </tr>
+        <tr>
+          <th>Materijal "Unutra"</th>
+          <td><%= narudzba.materijalUnutra.naziv %></td>
+        </tr>
+        <tr>
+          <th>Boja "Unutra"</th>
+          <td><%= narudzba.bojaUnutra.naziv %></td>
+        </tr>
+        <tr>
+          <th>Aplikacija</th>
+          <td><%= narudzba.aplikacija.naziv %></td>
+        </tr>
+        <tr>
+          <th>Model</th>
+          <td><%= narudzba.model.naziv %></td>
+        </tr>
+        <tr>
+          <th>Staklo</th>
+          <td><%= narudzba.staklo.naziv %></td>
+        </tr>
+        <tr>
+          <th>Dimenzije</th>
+          <td><%= narudzba.dimenzije %></td>
+        </tr>
+        <tr>
+          <th>Količina</th>
+          <td><%= narudzba.kolicina %></td>
+        </tr>
+        <tr>
+          <th>Napomena</th>
+          <td><%= narudzba.napomena %></td>
+        </tr>
+        <tr>
+          <th>Izvedba</th>
+          <td><%= narudzba.izvedba %></td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td><%= narudzba.status %></td>
+        </tr>
+        <tr>
+          <th>Status Tehničke Pripreme</th>
+          <td><%= narudzba.statusTehnickaPriprema %></td>
+        </tr>
+        <tr>
+          <th>Status CNC</th>
+          <td><%= narudzba.statusCNC %></td>
+        </tr>
+        <tr>
+          <th>Status Farbara</th>
+          <td><%= narudzba.statusFarbara %></td>
+        </tr>
+        <tr>
+          <th>Status Aplikacija WJ</th>
+          <td><%= narudzba.statusAplikacijaWJ %></td>
+        </tr>
+        <tr>
+          <th>Status Staklo</th>
+          <td><%= narudzba.statusStaklo %></td>
+        </tr>
+        <tr>
+          <th>Status Ljepljenje</th>
+          <td><%= narudzba.statusLjepljenje %></td>
+        </tr>
+        <tr>
+          <th>Status Završavanje</th>
+          <td><%= narudzba.statusZavrsavanje %></td>
+        </tr>
+      </table>
+  
+      <button class="btn btn-primary" onclick="window.print()">Ispiši Stranicu</button>
+    </div>
+  </body>
+</html>
