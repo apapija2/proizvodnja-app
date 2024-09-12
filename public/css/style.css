@@ -78,17 +78,13 @@ h2 {
   margin-left: auto;
   margin-right: auto;
 }
-.navbar-brand {
-  font-weight: bold;
-}
+
 
 .container {
   padding-top: 50px;
 }
 
-.dropdown-menu {
-  min-width: 200px;
-}
+
 
 .form-control {
   margin-bottom: 15px;
@@ -97,3 +93,66 @@ h2 {
 .btn-primary {
   margin-top: 10px;
 }
+/* Style for the navbar */
+.navbar {
+  background-color: #3b5998; /* Facebook-like blue background */
+  padding: 1rem;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Style for the navbar */
+.navbar {
+  background-color: #3b5998; /* Facebook-like blue background */
+  padding: 1rem;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Button-like appearance for nav items */
+.nav-link {
+  color: #fff !important; /* White text */
+  padding: 8px 16px;
+  border-radius: 25px;
+  background-color: #2c448e; /* Darker blue for buttons */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover effect for nav items */
+.nav-link:hover {
+  background-color: #1f326b; /* Slightly darker blue on hover */
+  transform: scale(1.05); /* Slight scale effect */
+}
+
+/* Dropdown items styling */
+.dropdown-menu {
+  background-color: #3b5998; /* Blue background for dropdown */
+  border-radius: 0.25rem;
+}
+
+.dropdown-item {
+  color: #fff !important;
+  padding: 8px 16px;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover effect for dropdown items */
+.dropdown-item:hover {
+  background-color: #1f326b; /* Darker blue on hover */
+}
+
+/* Toggler button */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 0.5%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+

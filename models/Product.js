@@ -5,7 +5,7 @@ const ProductSchema = new mongoose.Schema({
     datumNarudzbe: { type: Date, required: true },
     planiratniZavrsetak: { type: Date, required: true },
 
-    imeKupca: { type: mongoose.Schema.Types.ObjectId, ref: 'Kupac', default: null },
+    kupac: { type: mongoose.Schema.Types.ObjectId, ref: 'Kupac', default: null },
     // Ako je povezano s kolekcijom Mjesto, koristi ObjectId; ako nema veze, može biti string
     mjestoKupca: { type: mongoose.Schema.Types.ObjectId, ref: 'Mjesto', default: null },
     

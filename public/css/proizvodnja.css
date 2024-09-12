@@ -96,27 +96,5 @@ h2 {
     margin-right: auto;
 }
 
-.navbar-brand {
-    font-weight: bold;
-  }
-  
-  .container {
-    padding-top: 50px;
-  }
-  
-  .dropdown-menu {
-    min-width: 200px;
-  }
-  .centered-box {
-    max-width: 600px; /* Širina boxa */
-    margin: 50px auto; /* Centriranje okvira na stranici */
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lagana sjena za karticu */
-    background-color: #ffffff;
-    border-radius: 10px;
-  }
-  
-  table {
-    margin-top: 20px;
-  }
+
   

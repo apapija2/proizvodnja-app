@@ -1,27 +1,24 @@
+// verifyToken.js
 const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.header('Authorization');
-  console.log('Authorization header:', authHeader);  // Provjera Authorization zaglavlja
+  if (!authHeader) {
+    return res.status(401).send('Access denied. No token provided.');
+  }
 
-  const token = authHeader?.split(' ')[1];  // Uzimanje tokena iz Authorization zaglavlja
-  console.log('Token:', token);  // Provjera vrijednosti tokena
-
+  const token = authHeader.split(' ')[1]; // "Bearer <token>"
   if (!token) {
-    console.log('Token missing');
-    return res.status(401).json({ message: 'Access denied, no token provided' });
+    return res.status(401).send('Access denied. Token missing.');
   }
 
   try {
-    const verified = jwt.verify(token, process.env.TOKEN_SECRET);  // Provjera JWT tokena
-    console.log('Verified token:', verified);  // Ispis verificiranog tokena
-    req.user = verified;  // Spremanje korisničkih podataka iz tokena u req.user
-    next();
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET);
+    req.user = verified; // Postavlja korisnika u req.user
+    next(); // Prelazi na sljedeći middleware ili rutu
   } catch (err) {
-    console.log('Invalid token:', err.message);  // Ispis greške prilikom verifikacije tokena
-    res.status(400).json({ message: 'Invalid token' });
+    res.status(400).send('Invalid token.');
   }
 };
 
 module.exports = verifyToken;
-

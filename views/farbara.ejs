@@ -3,41 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Farbara - Ažuriranje statusa</title>
-  <!-- Bootstrap CSS -->
+  <title>Farbara - Narudžbe</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="/css/proizvodnja.css">
 </head>
 <body>
-  <div class="container custom-container">
-    <h2>Ažuriranje statusa farbare</h2>
-    <form id="farbaraForm">
-      <div class="mb-3">
-        <label for="productId" class="form-label">ID Proizvoda</label>
-        <select id="productId" class="form-select" required>
-          <!-- Opcije će biti dodane dinamički pomoću JS -->
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="farbaraStatus" class="form-label">Status Tehnička Priprema</label>
-        <select id="farbaraStatus" class="form-select" required>
-          <option value="Nije u izradi">Nije u izradi</option>
-          <option value="U izradi">U izradi</option>
-          <option value="Gotov">Gotov</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="farbaraZavrseno" class="form-label">Završeno komada</label>
-        <input type="number" class="form-control" id="farbaraZavrseno" min="0" required>
-        <small id="quantityHelp" class="form-text text-muted"></small>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">Ažuriraj</button>
-    </form>
-  </div>
+  <%- include('partials/navbar') %>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/farbara.js"></script>
+  <div class="container mt-5">
+    <h1 class="text-center">Farbara - Ažuriranje statusa</h1>
+
+    <form action="/farbara" method="POST" class="mt-4">
+      <div class="mb-3">
+        <label for="productId" class="form-label">Narudžba:</label>
+        <select id="productId" name="productId" class="form-control" required>
+          <% narudzbas.forEach(function(narudzba) { %>
+            <option value="<%= narudzba._id %>"><%= narudzba.sifraProizvoda %> - <%= narudzba.kupac.naziv %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Status:</label>
+        <select id="status" name="status" class="form-control" required>
+          <option value="Nije započeto">Nije započeto</option>
+          <option value="U izradi">U izradi</option>
+          <option value="Gotovo">Gotovo</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="zavrseno" class="form-label">Broj završenih komada:</label>
+        <input type="number" id="zavrseno" name="zavrseno" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Ažuriraj Farbara status</button>
+    </form>
+
+    <h2 class="mt-5">Popis narudžbi</h2>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Šifra proizvoda</th>
+          <th>Kupac</th>
+          <th>Mjesto</th>
+          <th>Status Farbara</th>
+          <th>Završeno</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% narudzbas.forEach(function(narudzba) { %>
+          <tr>
+            <td><%= narudzba.sifraProizvoda %></td>
+            <td><%= narudzba.kupac.naziv %></td>
+            <td><%= narudzba.mjestoKupca.naziv %></td>
+            <td><%= narudzba.farbara.status %></td>
+            <td><%= narudzba.farbara.zavrseno %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>
