@@ -1,0 +1,15 @@
+<!-- report.ejs -->
+<h1>Izvještaj o Završetku Radova (Tehnička Priprema)</h1>
+
+<table border="1">
+  <tr>
+    <th>Korisnik</th>
+    <th>Završeni radovi</th>
+  </tr>
+  <% users.forEach(user => { %>
+    <tr>
+      <td><%= user.username %></td>
+      <td><%= user.workCompleted %> komada</td>
+    </tr>
+  <% }) %>
+</table>

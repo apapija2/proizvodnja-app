@@ -716,6 +716,15 @@ app.post('/zavrsavanje', async (req, res) => {
   }
 });
 
+app.get('/sifrant-proizvodnja-user', (req, res) => {
+  res.render('sifrant-proizvodnja-user');  // Renders your EJS file
+});
+
+
+
+
+
+
 
 
 
