@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ljepljenje - Narudžbe</title>
+  <title>Tehnička priprema</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -11,51 +12,49 @@
 
   <div class="container mt-5">
     <h1 class="text-center">Ljepljenje - Ažuriranje statusa</h1>
-
-    <form action="/ljepljenje" method="POST" class="mt-4">
+  
+    <form id="ljepljenjeForm" action="/ljepljenje" method="POST">
       <div class="mb-3">
         <label for="productId" class="form-label">Narudžba:</label>
-        <select id="productId" name="productId" class="form-control" required>
+        <select id="productId" name="productId" class="form-control">
           <% narudzbas.forEach(function(narudzba) { %>
-            <option value="<%= narudzba._id %>"><%= narudzba.sifraProizvoda %> - <%= narudzba.kupac.naziv %></option>
+            <option value="<%= narudzba._id %>"><%= narudzba.sifraProizvoda || 'Bez šifre' %> - <%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></option>
           <% }); %>
         </select>
       </div>
-
+  
       <div class="mb-3">
-        <label for="status" class="form-label">Status:</label>
-        <select id="status" name="status" class="form-control" required>
-          <option value="Nije započeto">Nije započeto</option>
+        <label for="ljepljenjeStatus" class="form-label">Status:</label>
+        <select id="ljepljenjeStatus" name="status" class="form-control">
+          <option value="Nije u izradi">Nije u izradi</option>
           <option value="U izradi">U izradi</option>
           <option value="Gotovo">Gotovo</option>
         </select>
       </div>
-
+  
       <div class="mb-3">
-        <label for="zavrseno" class="form-label">Broj završenih komada:</label>
-        <input type="number" id="zavrseno" name="zavrseno" class="form-control" required>
+        <label for="ljepljenjeZavrseno" class="form-label">Broj završenih komada:</label>
+        <input type="number" id="ljepljenjeZavrseno" name="zavrseno" class="form-control">
       </div>
-
-      <button type="submit" class="btn btn-primary">Ažuriraj Ljepljenje status</button>
+  
+      <button type="submit" class="btn btn-primary">Spremi</button>
     </form>
-
+  
     <h2 class="mt-5">Popis narudžbi</h2>
     <table class="table table-striped mt-3">
       <thead>
         <tr>
-          <th>Šifra proizvoda</th>
           <th>Kupac</th>
           <th>Mjesto</th>
-          <th>Status Ljepljenje</th>
+          <th>Status</th>
           <th>Završeno</th>
         </tr>
       </thead>
       <tbody>
         <% narudzbas.forEach(function(narudzba) { %>
           <tr>
-            <td><%= narudzba.sifraProizvoda %></td>
-            <td><%= narudzba.kupac.naziv %></td>
-            <td><%= narudzba.mjestoKupca.naziv %></td>
+            <td><%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></td>
+            <td><%= narudzba.mjestoKupca ? narudzba.mjestoKupca.naziv : 'N/A' %></td>
             <td><%= narudzba.ljepljenje.status %></td>
             <td><%= narudzba.ljepljenje.zavrseno %></td>
           </tr>
@@ -63,5 +62,5 @@
       </tbody>
     </table>
   </div>
-</body>
-</html>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>

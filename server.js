@@ -28,20 +28,37 @@ const app = express();
 
 // Postavi view engine na EJS
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', './views'); 
 
 // Parsiraj JSON i URL-encoded podatke iz zahtjeva
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Postavi statičke datoteke
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static('public'));
 // API rute
 app.use('/api/user', authRoute); // Ruta za autentifikaciju
 app.use('/api/product', productRoute); // Ruta za proizvode
 app.use('/api/sifranti', sifrantiRoute); // Ruta za šifrante
 app.use('/api/narudzbe', narudzbeRoute); // Ruta za narudžbe
+
+// Route for the dashboard
+app.get('/', async (req, res) => {
+  try {
+    const narudzbe = await Narudzba.find()
+      .populate('kupac')
+      .populate('mjestoKupca')
+      .populate('tehnickaPriprema')
+      .populate('cnc')
+      .populate('farbara');
+    
+    res.render('index', { narudzbe });
+  } catch (error) {
+    console.error('Error fetching orders: ', error);
+    res.status(500).send('Error fetching orders.');
+  }
+});
+
 
 
 // Serve views
@@ -61,7 +78,7 @@ app.get('/narudzbe', async (req, res) => {
       .populate('bojaUnutra')
       .populate('aplikacija')
       .populate('model')
-      .populate('stakloRef');
+      .populate('staklo');
 
     const kupci = await Kupac.find();
     const mjesta = await Mjesto.find();
@@ -91,10 +108,30 @@ app.get('/narudzbe', async (req, res) => {
   }
 });
 
-// Ruta za dodavanje narudžbe (POST)
+// Route to render the form for adding a new order (must come before /narudzbe/:id)
+app.get('/narudzbe/new', async (req, res) => {
+  try {
+    const kupci = await Kupac.find();
+    const mjesta = await Mjesto.find();
+    const materijaliVani = await MaterijalVani.find();
+    const bojeVani = await BojaVani.find();
+    const materijaliUnutra = await MaterijalUnutra.find();
+    const bojeUnutra = await BojaUnutra.find();
+    const aplikacije = await Aplikacija.find();
+    const modeli = await Model.find();
+    const stakla = await Staklo.find();
+
+    res.render('new', { kupci, mjesta, materijaliVani, bojeVani, materijaliUnutra, bojeUnutra, aplikacije, modeli, stakla });
+  } catch (error) {
+    console.error('Greška pri dohvaćanju podataka:', error.message);
+    res.status(500).send('Greška pri dohvaćanju podataka.');
+  }
+});
+
+// Route to handle form submission
 app.post('/narudzbe', async (req, res) => {
   try {
-    const { datumNarudzbe, planiratniZavrsetak, kupac, mjestoKupca, materijalVani, bojaVani, materijalUnutra, bojaUnutra, aplikacija, model, staklo, dimenzije, kolicina, napomena, izvedba, status } = req.body;
+    const { datumNarudzbe, kupac, mjestoKupca, materijalVani, bojaVani, materijalUnutra, bojaUnutra, aplikacija, model, staklo, dimenzije, kolicina, napomena, planiratniZavrsetak, status } = req.body;
 
     const novaNarudzba = new Narudzba({
       datumNarudzbe,
@@ -111,17 +148,42 @@ app.post('/narudzbe', async (req, res) => {
       dimenzije,
       kolicina,
       napomena,
-      izvedba,
-      status
+      status,
     });
 
     await novaNarudzba.save();
-    res.redirect('/narudzbe'); // Nakon unosa preusmjerava na listu narudžbi
+    res.redirect('/narudzbe');  // Redirect to the order listing after adding
   } catch (error) {
-    console.error("Greška pri unosu narudžbe: ", error.message);
-    res.status(500).send('Greška pri unosu narudžbe');
+    console.error('Greška pri spremanju narudžbe:', error.message);
+    res.status(500).send('Greška pri spremanju narudžbe.');
   }
 });
+
+// Route to display individual order details
+app.get('/narudzbe/:id', async (req, res) => {
+  try {
+    const narudzba = await Narudzba.findById(req.params.id)
+      .populate('kupac')
+      .populate('mjestoKupca')
+      .populate('materijalVani')
+      .populate('bojaVani')
+      .populate('materijalUnutra')
+      .populate('bojaUnutra')
+      .populate('aplikacija')
+      .populate('model')
+      .populate('staklo');
+
+    if (!narudzba) {
+      return res.status(404).send('Narudžba nije pronađena.');
+    }
+
+    res.render('details', { narudzba });
+  } catch (error) {
+    console.error('Greška pri dohvaćanju narudžbe:', error.message);
+    res.status(500).send('Greška pri dohvaćanju narudžbe.');
+  }
+});
+
 app.post('/api/narudzbe', async (req, res) => {
   console.log(req.body);  // Dodaj ovo kako bi vidio dolaze li svi podaci ispravno
   try {
@@ -174,14 +236,41 @@ app.get('/api/product', async (req, res) => {
 
 app.get('/narudzbe/:id', async (req, res) => {
   try {
-    const narudzba = await Narudzba.findById(req.params.id).populate('kupac').populate('mjestoKupca');
-    res.render('narudzba-detalji', { narudzba }); // Prikazuje EJS stranicu s detaljima narudžbe
+    const narudzba = await Narudzba.findById(req.params.id)
+      .populate('kupac')
+      .populate('mjestoKupca')
+      .populate('materijalVani')
+      .populate('bojaVani')
+      .populate('materijalUnutra')
+      .populate('bojaUnutra')
+      .populate('aplikacija')
+      .populate('staklo')
+      .populate('model');
+
+    if (!narudzba) {
+      return res.status(404).send('Narudžba nije pronađena');
+    }
+
+    res.render('narudzba-detalji', { narudzba });
   } catch (error) {
-    res.status(500).send('Greška pri dohvaćanju detalja narudžbe: ' + error.message);
+    res.status(500).send('Greška pri dohvaćanju narudžbe: ' + error.message);
   }
 });
 
 
+app.get('/api/narudzbe', async (req, res) => {
+  try {
+    const narudzbe = await Narudzba.find()
+      .populate('kupac')
+      .populate('mjestoKupca')
+      .populate('tehnickaPriprema')
+      .populate('cnc')
+      .populate('farbara');
+    res.json(narudzbe);
+  } catch (error) {
+    res.status(500).send('Greška pri dohvaćanju narudžbi: ' + error.message);
+  }
+});
 
 // Ruta za šifrant kupca (GET)
 app.get('/sifrant-kupac', async (req, res) => {
@@ -398,7 +487,7 @@ app.get('/tehnicka-priprema', async (req, res) => {
       .populate('bojaUnutra')
       .populate('aplikacija')
       .populate('model')
-      .populate('stakloRef'); // Popunjava polje 'stakloRef'
+      .populate('staklo'); // Popunjava polje 'stakl'
 
     res.render('tehnicka-priprema', { narudzbas });
   } catch (error) {
@@ -423,7 +512,7 @@ app.post('/tehnicka-priprema', async (req, res) => {
       return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
     }
 
-    // Ažuriraj tehničku pripremu
+    // Ažuriraj tehFničku pripremu
     narudzba.tehnickaPriprema = {
       status: status,
       zavrseno: zavrseno
@@ -544,36 +633,13 @@ app.post('/farbara', async (req, res) => {
   }
 });
 
-// Ljepljenje routes
-app.get('/ljepljenje', async (req, res) => {
-  try {
-    const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
-    res.render('ljepljenje', { narudzbas });
-  } catch (error) {
-    res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
-  }
-});
-
-app.post('/ljepljenje', async (req, res) => {
-  try {
-    const { productId, status, zavrseno } = req.body;
-    const narudzba = await Narudzba.findById(productId);
-    if (!narudzba) return res.status(404).json({ error: 'Narudžba nije pronađena' });
-    if (zavrseno > narudzba.kolicina) return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
-    narudzba.ljepljenje = { status, zavrseno };
-    await narudzba.save();
-    res.redirect('/ljepljenje');
-  } catch (error) {
-    res.status(500).send('Greška pri ažuriranju podataka za Ljepljenje');
-  }
-});
-
-// Staklo routes
+// Staklo Route
 app.get('/staklo', async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('staklo', { narudzbas });
   } catch (error) {
+    console.error('Greška pri dohvaćanju narudžbi:', error.message);
     res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
   }
 });
@@ -581,14 +647,48 @@ app.get('/staklo', async (req, res) => {
 app.post('/staklo', async (req, res) => {
   try {
     const { productId, status, zavrseno } = req.body;
-    const narudzba = await Narudzba.findById(productId);
-    if (!narudzba) return res.status(404).json({ error: 'Narudžba nije pronađena' });
-    if (zavrseno > narudzba.kolicina) return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
-    narudzba.staklo = { status, zavrseno };
-    await narudzba.save();
+
+    // Update the status and zavrseno for the specific narudzba
+    await Narudzba.findByIdAndUpdate(productId, {
+      $set: {
+        'statusStaklo.status': status,
+        'statusStaklo.zavrseno': zavrseno
+      }
+    });
+
     res.redirect('/staklo');
   } catch (error) {
-    res.status(500).send('Greška pri ažuriranju podataka za Staklo');
+    console.error('Error updating staklo status:', error.message);
+    res.status(500).send('Error updating staklo status');
+  }
+});
+
+// Ljepljenje Route
+app.get('/ljepljenje', async (req, res) => {
+  try {
+    const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
+    res.render('ljepljenje', { narudzbas });
+  } catch (error) {
+    console.error("Greška pri dohvaćanju narudžbi:", error.message);
+    res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
+  }
+});
+
+app.post('/ljepljenje', async (req, res) => {
+  try {
+    const { productId, status, zavrseno } = req.body;
+
+    await Narudzba.findByIdAndUpdate(productId, {
+      $set: {
+        'ljepljenje.status': status,
+        'ljepljenje.zavrseno': zavrseno
+      }
+    });
+
+    res.redirect('/ljepljenje');
+  } catch (error) {
+    console.error('Error updating ljepljenje status:', error.message);
+    res.status(500).send('Error updating ljepljenje status');
   }
 });
 

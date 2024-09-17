@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pregled narudžbi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <div class="container mt-5">
+    <h1 class="text-center">Pregled narudžbi</h1>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Kod</th>
+          <th>Datum narudžbe</th>
+          <th>Ime</th>
+          <th>Mjesto</th>
+          <th>Tehnička priprema</th>
+          <th>CNC</th>
+          <th>Farbara</th>
+          <th>Status</th>
+          <th>Detalji</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% narudzbe.forEach(function(narudzba) { %>
+          <tr>
+            <td><%= narudzba.sifraProizvoda %></td>
+            <td><%= new Date(narudzba.datumNarudzbe).toLocaleDateString() %></td>
+            <td><%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></td>
+            <td><%= narudzba.mjestoKupca ? narudzba.mjestoKupca.naziv : 'N/A' %></td>
+            <td><%= narudzba.tehnickaPriprema ? narudzba.tehnickaPriprema.status : 'N/A' %></td>
+            <td><%= narudzba.cnc ? narudzba.cnc.status : 'N/A' %></td>
+            <td><%= narudzba.farbara ? narudzba.farbara.status : 'N/A' %></td>
+            <td><%= narudzba.status %></td>
+            <td>
+              <a href="/narudzbe/<%= narudzba._id %>" class="btn btn-primary">Detalji</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

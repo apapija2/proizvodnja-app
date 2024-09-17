@@ -13,7 +13,7 @@ const narudzbaSchema = new mongoose.Schema({
   bojaUnutra: { type: mongoose.Schema.Types.ObjectId, ref: 'BojaUnutra' },
   aplikacija: { type: mongoose.Schema.Types.ObjectId, ref: 'Aplikacija' },
   model: { type: mongoose.Schema.Types.ObjectId, ref: 'Model' },
-  stakloRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Staklo' },  // Polje za referencu na staklo model
+  staklo: { type: mongoose.Schema.Types.ObjectId, ref: 'Staklo' },  // Polje za referencu na staklo model
   dimenzije: { type: String, required: true },
   kolicina: { type: Number, required: true },
   napomena: { type: String },
