@@ -1,18 +1,13 @@
-// authorizeRole.js
-function authorizeRole(allowedRoles) {
-    return (req, res, next) => {
-      if (!req.user || !req.user.role) {
-        return res.status(403).send('Access denied. No user role provided.');
-      }
-  
-      const userRole = req.user.role;
-      if (allowedRoles.includes(userRole)) {
-        next(); // Ako uloga odgovara, prelazi dalje
-      } else {
-        return res.status(403).send('Access denied. Insufficient role permissions.');
-      }
-    };
+const express = require('express');
+const router = express.Router();
+const verifyToken = require('../middleware/verifyToken.js');
+
+// Protected route
+const authorizeRole = (allowedRoles) => (req, res, next) => {
+  if (!req.user || !allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied. Insufficient permissions' });
   }
-  
-  module.exports = authorizeRole;
-  
+  next();
+};
+
+module.exports = authorizeRole;

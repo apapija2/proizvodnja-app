@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 
-// Definicija korisničkog shema
+// User Schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true }  // npr. 'admin', 'prodaja', 'tehnicka-priprema'
+  role: { type: String, required: true }, // Example roles: 'cnc', 'tehnicka-priprema', etc.
 });
 
-// Eksplicitno definiranje kolekcije 'users'
 module.exports = mongoose.model('User', userSchema, 'users');

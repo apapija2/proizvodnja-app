@@ -87,6 +87,3 @@ document.getElementById('cnc-form').addEventListener('submit', function(event) {
         // Send data to backend or handle as necessary
     }
 });
-app.get('/sifrant-proizvodnja-user', (req, res) => {
-    res.render('sifrant-proizvodnja-user');  // Renders your EJS file
-});

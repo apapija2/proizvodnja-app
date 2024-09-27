@@ -6,10 +6,12 @@ const mongoose = require('mongoose');
 const path = require('path');
 
 // Uvozi rute
-const authRoute = require('./routes/auth'); // Ruta za autentifikaciju
+const authRoute = require('./routes/auth');
+const verifyToken = require('./middleware/verifyToken');
 const productRoute = require('./routes/product'); // Ruta za proizvode
 const sifrantiRoute = require('./routes/sifranti'); // Ruta za šifrante
 const narudzbeRoute = require('./routes/narudzbe'); // Ruta za narudžbe
+
 
 // Uvozi modele
 const Narudzba = require('./models/Narudzba');
@@ -22,6 +24,7 @@ const BojaUnutra = require('./models/BojaUnutra');
 const Aplikacija = require('./models/Aplikacija');
 const Model = require('./models/Model');
 const Staklo = require('./models/Staklo');
+const authorizeRole = require('./middleware/authorizeRole');
 
 // Inicijaliziraj Express aplikaciju
 const app = express();
@@ -32,7 +35,7 @@ app.set('views', './views');
 
 // Parsiraj JSON i URL-encoded podatke iz zahtjeva
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 // Postavi statičke datoteke
 app.use(express.static('public'));
@@ -41,6 +44,8 @@ app.use('/api/user', authRoute); // Ruta za autentifikaciju
 app.use('/api/product', productRoute); // Ruta za proizvode
 app.use('/api/sifranti', sifrantiRoute); // Ruta za šifrante
 app.use('/api/narudzbe', narudzbeRoute); // Ruta za narudžbe
+app.use('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), (req, res) => res.send('Aplikacija WJ dashboard'));
+app.use('/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), (req, res) => res.send('/tehnicka-priprema'));
 
 // Route for the dashboard
 app.get('/', async (req, res) => {
@@ -59,13 +64,24 @@ app.get('/', async (req, res) => {
   }
 });
 
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 
-// Serve views
+app.use('/login', authRoute); // Use auth routes for login
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login'); // This should render login.ejs from the views folder
 });
 
+
+
+app.get('/admin', verifyToken, authorizeRole(['admin']), (req, res) => {
+  res.send('Admin dashboard');
+});
+
+app.get('/aplikacija-wj', verifyToken, (req, res) => {
+  res.send('Aplikacija WJ dashboard');
+});
 // Ruta za narudžbe (GET)
 app.get('/narudzbe', async (req, res) => {
   try {
@@ -476,7 +492,7 @@ app.post('/sifrant-staklo', async (req, res) => {
 
 
 // Ruta za tehničke korisnike
-app.get('/tehnicka-priprema', async (req, res) => {
+app.get('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find()
       .populate('kupac')
@@ -554,7 +570,7 @@ app.put('/api/narudzba/:id/tehnicka-priprema', async (req, res) => {
 
 
 // Rute za HTML datoteke
-app.get('/cnc', async (req, res) => {
+app.get('/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find()
       .populate('kupac')
@@ -586,7 +602,7 @@ app.post('/cnc', async (req, res) => {
 });
 
 // Aplikacija WJ routes
-app.get('/aplikacija-wj', async (req, res) => {
+app.get('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('aplikacija-wj', { narudzbas });
@@ -594,6 +610,7 @@ app.get('/aplikacija-wj', async (req, res) => {
     res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
   }
 });
+
 
 app.post('/aplikacija-wj', async (req, res) => {
   try {
@@ -610,7 +627,7 @@ app.post('/aplikacija-wj', async (req, res) => {
 });
 
 // Farbara routes
-app.get('/farbara', async (req, res) => {
+app.get('/farbara' , authorizeRole(['farbara']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('farbara', { narudzbas });
@@ -634,7 +651,7 @@ app.post('/farbara', async (req, res) => {
 });
 
 // Staklo Route
-app.get('/staklo', async (req, res) => {
+app.get('/staklo', authorizeRole(['staklo']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('staklo', { narudzbas });
@@ -664,7 +681,7 @@ app.post('/staklo', async (req, res) => {
 });
 
 // Ljepljenje Route
-app.get('/ljepljenje', async (req, res) => {
+app.get('/ljepljenje', authorizeRole(['ljepljenje']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('ljepljenje', { narudzbas });
@@ -693,7 +710,7 @@ app.post('/ljepljenje', async (req, res) => {
 });
 
 // Završavanje routes
-app.get('/zavrsavanje', async (req, res) => {
+app.get('/zavrsavanje', authorizeRole(['zavrsavanje']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('zavrsavanje', { narudzbas });
@@ -721,24 +738,134 @@ app.get('/sifrant-proizvodnja-user', (req, res) => {
 });
 
 
+// Render the edit form
+// Edit route for rendering the form with pre-filled data
+// Edit route with redirect based on role
+app.get('/narudzbe/:id/edit', verifyToken, async (req, res) => {
+  try {
+    const narudzba = await Narudzba.findById(req.params.id)
+      .populate('kupac')
+      .populate('materijalVani')
+      .populate('materijalUnutra')
+      .populate('bojaVani')
+      .populate('bojaUnutra')
+      .populate('aplikacija')
+      .populate('model')
+      .populate('staklo');
+
+    const { role } = req.user; // Ensure req.user is set correctly by verifyToken middleware
+
+    // Redirect based on user role
+    switch (role) {
+      case 'tehnicka-priprema':
+        return res.redirect('/tehnicka-priprema');
+      case 'cnc':
+        return res.redirect('/cnc');
+      case 'aplikacija-wj':
+        return res.redirect('/aplikacija-wj');
+      case 'farbara':
+        return res.redirect('/farbara');
+      case 'ljepljenje':
+        return res.redirect('/ljepljenje');
+      case 'staklo':
+        return res.redirect('/staklo');
+      case 'zavrsavanje':
+        return res.redirect('/zavrsavanje');
+      default:
+        return res.render('narudzba-edit', { narudzba });
+    }
+  } catch (error) {
+    console.error('Error fetching data for edit form:', error);
+    res.status(500).send('Error fetching data.');
+  }
+});
+
+
+
+// Update an order
+// Route to handle updating an order (PUT request)
+app.put('/narudzbe/:id', async (req, res) => {
+  try {
+    // Extract the form data from req.body
+    const {
+      sifraProizvoda,
+      datumNarudzbe,
+      planiraniZavrsetak,
+      kupac,
+      materijalVani,
+      bojaVani,
+      materijalUnutra,
+      bojaUnutra,
+      aplikacija,
+      model,
+      staklo,
+      dimenzije,
+      kolicina,
+      napomena,
+      status
+    } = req.body;
+
+    // Update the order in the database
+    await Narudzba.findByIdAndUpdate(req.params.id, {
+      sifraProizvoda,
+      datumNarudzbe,
+      planiraniZavrsetak,
+      kupac,
+      materijalVani,
+      bojaVani,
+      materijalUnutra,
+      bojaUnutra,
+      aplikacija,
+      model,
+      staklo,
+      dimenzije,
+      kolicina,
+      napomena,
+      status
+    });
+
+    // Redirect back to the list of orders after updating
+    res.redirect('/narudzbe');
+  } catch (error) {
+    console.error('Error updating the order:', error);
+    res.status(500).send('Error updating order.');
+  }
+});
+
+
+// Delete an order
+app.delete('/narudzbe/:id', async (req, res) => {
+  try {
+    await Narudzba.findByIdAndDelete(req.params.id);
+    res.redirect('/narudzbe');  // Redirect after deleting
+  } catch (error) {
+    console.error('Error deleting narudžba:', error);
+    res.status(500).send('Error deleting narudžba.');
+  }
+});
 
 
 
 
 
+const authRoutes = require('./routes/auth');
+app.use('/', authRoutes); // Use your auth routes for handling login submission
+
+app.get('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), (req, res) => {
+  res.send('Aplikacija WJ dashboard');
+});
 
 
-// Povezivanje s MongoDB bazom podataka
-mongoose
-  .connect('mongodb://127.0.0.1:27017/proizvodnja', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log('Connected to DB'))
-  .catch((err) => console.error('Connection error', err));
 
-// Pokretanje servera
+// MongoDB connection
+mongoose.connect('mongodb://127.0.0.1:27017/proizvodnja', {}).then(() => {
+  console.log('Connected to DB');
+}).catch((err) => {
+  console.error('Connection error', err);
+});
+
+// Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

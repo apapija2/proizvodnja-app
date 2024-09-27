@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Narudzba');
-const verifyToken = require('../middleware/verifyToken');
-const authorizeRole = require('../middleware/authorizeRole');
+const verifyToken = require('../middleware/verifyToken'); // Adjust paths based on your project structure
+const authorizeRole = require('../middleware/authorizeRole'); // Correct import for authorizeRole
 
 // Dodavanje novog proizvoda (samo prodaja)
 router.post('/',async (req, res) => {
@@ -33,20 +32,21 @@ router.get('/', verifyToken, async (req, res) => {
 
 
 router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), async (req, res) => {
-    const { status, zavrseno } = req.body;
-    const product = await Product.findById(req.params.id);
-
-    if (zavrseno > product.kolicina) {
-        return res.status(400).json({ error: 'Broj dovršenih komada ne može biti veći od ukupne količine narudžbe.' });
+    try {
+      const { status, zavrseno } = req.body;
+      const narudzba = await Narudzba.findById(req.params.id);
+      if (!narudzba) return res.status(404).json({ error: 'Narudžba nije pronađena' });
+  
+      if (zavrseno > narudzba.kolicina) return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
+  
+      narudzba.tehnickaPriprema = { status, zavrseno };
+      await narudzba.save();
+      res.status(200).json({ message: 'Tehnička priprema uspješno ažurirana' });
+    } catch (error) {
+      res.status(500).json({ error: 'Greška pri ažuriranju tehničke pripreme' });
     }
-
-    product.tehnickaPriprema.status = status;
-    product.tehnickaPriprema.zavrseno = zavrseno;
-    await product.save();
-
-    res.json(product);
-});
-
+  });
+  
 
 // Ažuriranje statusa stakla
 router.put('/:id/staklo', verifyToken, authorizeRole(['staklo']), async (req, res) => {
