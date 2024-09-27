@@ -1,3 +1,4 @@
+// File: login.js
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault(); // Prevent form from refreshing the page
 
@@ -16,12 +17,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     });
 
     if (response.ok) {
-      const { token, role } = await response.json(); // Receive token and role
-
-      // Store token in localStorage for future requests
-      localStorage.setItem('token', token);
-      sessionStorage.setItem('token', token);
-  
+      const { role } = await response.json(); // Receive the role from the server
 
       // Redirect based on user role
       switch (role) {
@@ -32,7 +28,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
           window.location.href = '/tehnicka-priprema'; // Redirect to Tehnička Priprema dashboard
           break;
         case 'aplikacija-wj':
-          window.location.href = '/aplikacija-wj'; // Redirect to aplikacija-wj dashboard
+          window.location.href = '/aplikacija-wj'; // Redirect to Aplikacija WJ dashboard
           break;
         default:
           window.location.href = '/'; // Default redirection

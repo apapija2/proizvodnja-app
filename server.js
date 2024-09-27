@@ -287,6 +287,45 @@ app.get('/api/narudzbe', async (req, res) => {
     res.status(500).send('Greška pri dohvaćanju narudžbi: ' + error.message);
   }
 });
+// Role-based redirection from /narudzbe/:id/edit
+app.get('/narudzbe/:id/edit', async (req, res) => {
+  try {
+    const narudzba = await Narudzba.findById(req.params.id)
+      .populate('kupac')
+      .populate('materijalVani')
+      .populate('materijalUnutra')
+      .populate('bojaVani')
+      .populate('bojaUnutra')
+      .populate('aplikacija')
+      .populate('model')
+      .populate('staklo');
+
+    const userRole = req.user.role; // Assume req.user contains user info from session
+
+    // Redirect to the appropriate production stage based on user role
+    switch (userRole) {
+      case 'cnc':
+        return res.redirect(`/cnc/${narudzba._id}`);
+      case 'tehnicka-priprema':
+        return res.redirect(`/tehnicka-priprema/${narudzba._id}`);
+      case 'aplikacija-wj':
+        return res.redirect(`/aplikacija-wj/${narudzba._id}`);
+      case 'farbara':
+        return res.redirect(`/farbara/${narudzba._id}`);
+      case 'ljepljenje':
+        return res.redirect(`/ljepljenje/${narudzba._id}`);
+      case 'staklo':
+        return res.redirect(`/staklo/${narudzba._id}`);
+      case 'zavrsavanje':
+        return res.redirect(`/zavrsavanje/${narudzba._id}`);
+      default:
+        return res.render('narudzba-edit', { narudzba }); // Default editing page
+    }
+  } catch (error) {
+    console.error('Error fetching data for edit form:', error);
+    res.status(500).send('Error fetching data.');
+  }
+});
 
 // Ruta za šifrant kupca (GET)
 app.get('/sifrant-kupac', async (req, res) => {
@@ -570,14 +609,16 @@ app.put('/api/narudzba/:id/tehnicka-priprema', async (req, res) => {
 
 
 // Rute za HTML datoteke
-app.get('/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => {
+// Remove verifyToken middleware
+app.get('/cnc/:id', async (req, res) => {
   try {
-    const narudzbas = await Narudzba.find()
+    const narudzba = await Narudzba.findById(req.params.id)
       .populate('kupac')
       .populate('mjestoKupca');
-    res.render('cnc', { narudzbas });
+
+    res.render('cnc', { narudzba });
   } catch (error) {
-    res.status(500).send('Greška pri dohvaćanju podataka o narudžbama');
+    res.status(500).send('Error fetching CNC data.');
   }
 });
 
@@ -741,42 +782,27 @@ app.get('/sifrant-proizvodnja-user', (req, res) => {
 // Render the edit form
 // Edit route for rendering the form with pre-filled data
 // Edit route with redirect based on role
-app.get('/narudzbe/:id/edit', verifyToken, async (req, res) => {
+
+app.post('/cnc/:id', async (req, res) => {
   try {
-    const narudzba = await Narudzba.findById(req.params.id)
-      .populate('kupac')
-      .populate('materijalVani')
-      .populate('materijalUnutra')
-      .populate('bojaVani')
-      .populate('bojaUnutra')
-      .populate('aplikacija')
-      .populate('model')
-      .populate('staklo');
+    const { status, zavrseno } = req.body;
+    const narudzba = await Narudzba.findById(req.params.id);
 
-    const { role } = req.user; // Ensure req.user is set correctly by verifyToken middleware
-
-    // Redirect based on user role
-    switch (role) {
-      case 'tehnicka-priprema':
-        return res.redirect('/tehnicka-priprema');
-      case 'cnc':
-        return res.redirect('/cnc');
-      case 'aplikacija-wj':
-        return res.redirect('/aplikacija-wj');
-      case 'farbara':
-        return res.redirect('/farbara');
-      case 'ljepljenje':
-        return res.redirect('/ljepljenje');
-      case 'staklo':
-        return res.redirect('/staklo');
-      case 'zavrsavanje':
-        return res.redirect('/zavrsavanje');
-      default:
-        return res.render('narudzba-edit', { narudzba });
+    if (!narudzba) {
+      return res.status(404).json({ error: 'Order not found' });
     }
+
+    if (zavrseno > narudzba.kolicina) {
+      return res.status(400).json({ error: 'Completed quantity cannot exceed total quantity' });
+    }
+
+    // Update the CNC progress
+    narudzba.cnc = { status, zavrseno };
+    await narudzba.save();
+
+    res.redirect(`/cnc/${narudzba._id}`);
   } catch (error) {
-    console.error('Error fetching data for edit form:', error);
-    res.status(500).send('Error fetching data.');
+    res.status(500).send('Error updating CNC data');
   }
 });
 
