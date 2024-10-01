@@ -7,7 +7,6 @@ const path = require('path');
 
 // Uvozi rute
 const authRoute = require('./routes/auth');
-const verifyToken = require('./middleware/verifyToken');
 const productRoute = require('./routes/product'); // Ruta za proizvode
 const sifrantiRoute = require('./routes/sifranti'); // Ruta za šifrante
 const narudzbeRoute = require('./routes/narudzbe'); // Ruta za narudžbe
@@ -25,6 +24,7 @@ const Aplikacija = require('./models/Aplikacija');
 const Model = require('./models/Model');
 const Staklo = require('./models/Staklo');
 const authorizeRole = require('./middleware/authorizeRole');
+const session = require('express-session');
 
 // Inicijaliziraj Express aplikaciju
 const app = express();
@@ -44,8 +44,22 @@ app.use('/api/user', authRoute); // Ruta za autentifikaciju
 app.use('/api/product', productRoute); // Ruta za proizvode
 app.use('/api/sifranti', sifrantiRoute); // Ruta za šifrante
 app.use('/api/narudzbe', narudzbeRoute); // Ruta za narudžbe
-app.use('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), (req, res) => res.send('Aplikacija WJ dashboard'));
-app.use('/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), (req, res) => res.send('/tehnicka-priprema'));
+app.use('/aplikacija-wj', authorizeRole(['aplikacija-wj']), (req, res) => res.send('Aplikacija WJ dashboard'));
+app.use('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), (req, res) => res.send('/tehnicka-priprema'));
+
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your_secret_key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Set to true if using https
+}));
+
+// Middleware to populate user session
+app.use((req, res, next) => {
+  res.locals.user = req.session.user;
+  next();
+});
 
 // Route for the dashboard
 app.get('/', async (req, res) => {
@@ -53,6 +67,12 @@ app.get('/', async (req, res) => {
     const narudzbe = await Narudzba.find()
       .populate('kupac')
       .populate('mjestoKupca')
+      .populate('bojaVani')
+      .populate('bojaUnutra')
+      .populate('materijalVani')
+      .populate('materijalUnutra')
+      .populate('model')
+    
       .populate('tehnickaPriprema')
       .populate('cnc')
       .populate('farbara');
@@ -75,13 +95,8 @@ app.get('/login', (req, res) => {
 
 
 
-app.get('/admin', verifyToken, authorizeRole(['admin']), (req, res) => {
-  res.send('Admin dashboard');
-});
 
-app.get('/aplikacija-wj', verifyToken, (req, res) => {
-  res.send('Aplikacija WJ dashboard');
-});
+
 // Ruta za narudžbe (GET)
 app.get('/narudzbe', async (req, res) => {
   try {
@@ -172,6 +187,17 @@ app.post('/narudzbe', async (req, res) => {
   } catch (error) {
     console.error('Greška pri spremanju narudžbe:', error.message);
     res.status(500).send('Greška pri spremanju narudžbe.');
+  }
+});
+// Ensure you pass the kupci data to the view when rendering the edit page
+app.get('/narudzba/:id/edit', async (req, res) => {
+  try {
+    const narudzba = await Narudzba.findById(req.params.id).populate('kupac');
+    const kupci = await Kupac.find(); // Fetch all kupci
+    res.render('narudzba-edit', { narudzba, kupci });
+  } catch (error) {
+    console.error('Error fetching data for edit form:', error);
+    res.status(500).send('Error fetching order data');
   }
 });
 
@@ -290,19 +316,11 @@ app.get('/api/narudzbe', async (req, res) => {
 // Role-based redirection from /narudzbe/:id/edit
 app.get('/narudzbe/:id/edit', async (req, res) => {
   try {
-    const narudzba = await Narudzba.findById(req.params.id)
-      .populate('kupac')
-      .populate('materijalVani')
-      .populate('materijalUnutra')
-      .populate('bojaVani')
-      .populate('bojaUnutra')
-      .populate('aplikacija')
-      .populate('model')
-      .populate('staklo');
+    const narudzba = await Narudzba.findById(req.params.id).populate('kupac');
+    
+    // Check the role and redirect based on the user's role
+    const userRole = req.session.user.role; // Assuming you have the user role saved in the session
 
-    const userRole = req.user.role; // Assume req.user contains user info from session
-
-    // Redirect to the appropriate production stage based on user role
     switch (userRole) {
       case 'cnc':
         return res.redirect(`/cnc/${narudzba._id}`);
@@ -312,20 +330,17 @@ app.get('/narudzbe/:id/edit', async (req, res) => {
         return res.redirect(`/aplikacija-wj/${narudzba._id}`);
       case 'farbara':
         return res.redirect(`/farbara/${narudzba._id}`);
-      case 'ljepljenje':
-        return res.redirect(`/ljepljenje/${narudzba._id}`);
-      case 'staklo':
-        return res.redirect(`/staklo/${narudzba._id}`);
-      case 'zavrsavanje':
-        return res.redirect(`/zavrsavanje/${narudzba._id}`);
+      case 'prodaja': // No redirection for prodaja, it stays the same
       default:
-        return res.render('narudzba-edit', { narudzba }); // Default editing page
+        return res.render('narudzba-edit', { narudzba });
     }
   } catch (error) {
-    console.error('Error fetching data for edit form:', error);
-    res.status(500).send('Error fetching data.');
+    console.error('Error fetching order data:', error);
+    res.status(500).send('Error fetching order data');
   }
 });
+
+
 
 // Ruta za šifrant kupca (GET)
 app.get('/sifrant-kupac', async (req, res) => {
@@ -643,7 +658,7 @@ app.post('/cnc', async (req, res) => {
 });
 
 // Aplikacija WJ routes
-app.get('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), async (req, res) => {
+app.get('/aplikacija-wj', authorizeRole(['aplikacija-wj']), async (req, res) => {
   try {
     const narudzbas = await Narudzba.find().populate('kupac').populate('mjestoKupca');
     res.render('aplikacija-wj', { narudzbas });
@@ -796,7 +811,7 @@ app.post('/cnc/:id', async (req, res) => {
       return res.status(400).json({ error: 'Completed quantity cannot exceed total quantity' });
     }
 
-    // Update the CNC progress
+    // Update CNC data
     narudzba.cnc = { status, zavrseno };
     await narudzba.save();
 
@@ -805,6 +820,7 @@ app.post('/cnc/:id', async (req, res) => {
     res.status(500).send('Error updating CNC data');
   }
 });
+
 
 
 
@@ -877,9 +893,7 @@ app.delete('/narudzbe/:id', async (req, res) => {
 const authRoutes = require('./routes/auth');
 app.use('/', authRoutes); // Use your auth routes for handling login submission
 
-app.get('/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), (req, res) => {
-  res.send('Aplikacija WJ dashboard');
-});
+
 
 
 

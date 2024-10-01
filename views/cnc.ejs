@@ -14,32 +14,21 @@
     <h1 class="text-center">CNC - Ažuriranje statusa</h1>
 
     <!-- Forma za ažuriranje CNC statusa -->
-    <form action="/cnc" method="POST" class="mt-4">
-      <div class="mb-3">
-        <label for="productId" class="form-label">Narudžba:</label>
-        <select id="productId" name="productId" class="form-control" required>
-          <% narudzbas.forEach(function(narudzba) { %>
-            <option value="<%= narudzba._id %>"><%= narudzba.sifraProizvoda %> - <%= narudzba.kupac.naziv %></option>
-          <% }); %>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label for="status" class="form-label">Status:</label>
-        <select id="status" name="status" class="form-control" required>
-          <option value="Nije započeto">Nije započeto</option>
-          <option value="U izradi">U izradi</option>
-          <option value="Gotovo">Gotovo</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label for="zavrseno" class="form-label">Broj završenih komada:</label>
-        <input type="number" id="zavrseno" name="zavrseno" class="form-control" required>
-      </div>
-
-      <button type="submit" class="btn btn-primary">Ažuriraj CNC status</button>
+    <form id="cncForm" method="POST" action="/cnc/<%= narudzba._id %>">
+      <h3>CNC Production for Order <%= narudzba.sifraProizvoda %></h3>
+    
+      <label for="cncStatus">Status:</label>
+      <select id="cncStatus" name="status">
+        <option value="In Progress" <%= narudzba.cnc && narudzba.cnc.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+        <option value="Completed" <%= narudzba.cnc && narudzba.cnc.status === 'Completed' ? 'selected' : '' %>>Completed</option>
+      </select>
+    
+      <label for="cncZavrseno">Completed Pieces:</label>
+      <input type="number" id="cncZavrseno" name="zavrseno" value="<%= narudzba.cnc ? narudzba.cnc.zavrseno : 0 %>" max="<%= narudzba.kolicina %>" />
+    
+      <button type="submit">Update CNC</button>
     </form>
+    
 
     <h2 class="mt-5">Popis narudžbi</h2>
     <table class="table table-striped mt-3">

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Narudzba');
-const verifyToken = require('../middleware/verifyToken');
 const authorizeRole = require('../middleware/authorizeRole');
 
 // Dodavanje novog proizvoda (samo prodaja)
@@ -13,26 +12,44 @@ router.post('/', async (req, res) => {
 
 
 // Ruta za dodavanje proizvodaS
-router.post('/', async (req, res) => {
-    const { sifraProizvoda, imeProizvoda } = req.body;
+// Route to fetch all orders
+router.get('/', async (req, res) => {
     try {
-      const noviProizvod = new Product({ sifraProizvoda, imeProizvoda });
-      await noviProizvod.save();
-      res.status(201).json(noviProizvod);
+      const narudzbe = await Narudzba.find().populate('kupac').populate('mjestoKupca');
+      res.render('narudzbe', { narudzbe });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      console.error('Error fetching orders:', err);
+      res.status(500).send('Error fetching orders');
     }
   });
-// Dohvaćanje svih proizvoda (za dashboard)
-router.get('/', verifyToken, async (req, res) => {
-    const products = await Product.find();
-    res.json(products);
-});
-
+  
+  // Route to fetch a specific order by ID
+  router.get('/:id', async (req, res) => {
+    try {
+      const narudzba = await Narudzba.findById(req.params.id);
+      res.render('narudzba-edit', { narudzba });
+    } catch (err) {
+      console.error('Error fetching order:', err);
+      res.status(500).send('Error fetching order');
+    }
+  });
+  
+  // Route to update the order (only available to certain roles)
+  router.post('/:id', authorizeRole(['prodaja', 'tehnicka-priprema']), async (req, res) => {
+    try {
+      const narudzba = await Narudzba.findById(req.params.id);
+      narudzba.status = req.body.status; // Update the status or other details
+      await narudzba.save();
+      res.redirect('/narudzbe');
+    } catch (err) {
+      console.error('Error updating order:', err);
+      res.status(500).send('Error updating order');
+    }
+  });
 // Ažuriranje statusa tehničke pripreme
 
 
-router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), async (req, res) => {
+router.put('/:id/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findById(req.params.id);
 
@@ -49,7 +66,7 @@ router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-pripr
 
 
 // Ažuriranje statusa stakla
-router.put('/:id/staklo', verifyToken, authorizeRole(['staklo']), async (req, res) => {
+router.put('/:id/staklo', authorizeRole(['staklo']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -60,7 +77,7 @@ router.put('/:id/staklo', verifyToken, authorizeRole(['staklo']), async (req, re
 });
 
 // CNC
-router.put('/:id/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => {
+router.put('/:id/cnc', authorizeRole(['cnc']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -71,7 +88,7 @@ router.put('/:id/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => 
 });
 
 // Farbara
-router.put('/:id/farbara', verifyToken, authorizeRole(['farbara']), async (req, res) => {
+router.put('/:id/farbara', authorizeRole(['farbara']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -82,7 +99,7 @@ router.put('/:id/farbara', verifyToken, authorizeRole(['farbara']), async (req, 
 });
 
 // Aplikacija-wj
-router.put('/:id/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), async (req, res) => {
+router.put('/:id/aplikacija-wj', authorizeRole(['aplikacija-wj']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -93,7 +110,7 @@ router.put('/:id/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), 
 });
 
 // Lijepljenje
-router.put('/:id/ljepljenje', verifyToken, authorizeRole(['ljepljenje']), async (req, res) => {
+router.put('/:id/ljepljenje', authorizeRole(['ljepljenje']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -104,7 +121,7 @@ router.put('/:id/ljepljenje', verifyToken, authorizeRole(['ljepljenje']), async 
 });
 
 // Završavanje
-router.put('/:id/zavrsavanje', verifyToken, authorizeRole(['zavrsavanje']), async (req, res) => {
+router.put('/:id/zavrsavanje', authorizeRole(['zavrsavanje']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -114,7 +131,7 @@ router.put('/:id/zavrsavanje', verifyToken, authorizeRole(['zavrsavanje']), asyn
     res.json(product);
 });
 
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
       const products = await Product.find();
   

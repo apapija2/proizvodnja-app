@@ -6,11 +6,18 @@ document.addEventListener('DOMContentLoaded', async function () {
   let selectedProduct = null;
 
   const response = await fetch('/api/product', {
-    headers: {
-      'auth-token': localStorage.getItem('token'),
-    },
-  });
 
+  });
+  app.get('/cnc/:id', async (req, res) => {
+    try {
+      const narudzba = await Narudzba.findById(req.params.id);
+      res.render('cnc', { narudzba });
+    } catch (error) {
+      console.error('Error fetching order data for CNC:', error);
+      res.status(500).send('Error fetching order data');
+    }
+  });
+  
   if (!response.ok) {
     console.error('Failed to load products:', response.statusText);
     return;
@@ -68,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async function () {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('token'),
       },
       body: JSON.stringify({ status, zavrseno }),
     });

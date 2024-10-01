@@ -6,9 +6,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Fetch all narudzbas (umjesto products)
   const response = await fetch('/api/narudzbas', {  // Ažurirana ruta za narudzbas
-    headers: {
-      'auth-token': localStorage.getItem('token'),
-    },
+
   });
 
   if (!response.ok) {
@@ -68,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async function () {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('token'),
       },
       body: JSON.stringify({ status, zavrseno }),
     });
