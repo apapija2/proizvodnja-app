@@ -1,76 +1,54 @@
 document.addEventListener('DOMContentLoaded', async function () {
-  const response = await fetch('/api/product', {
-    headers: {
-      'auth-token': localStorage.getItem('token'),
-    },
-  });
+  try {
+    const response = await fetch('/api/product'); // Dohvaćanje narudžbi s backend-a
+    const narudzbe = await response.json(); // Pretvorba odgovora u JSON
 
-  if (!response.ok) {
-    console.error('Failed to load products:', response.statusText);
-    return;
+    const tableBody = document.getElementById('productData');
+    tableBody.innerHTML = '';
+
+    // Popunjavanje tablice narudžbama
+    narudzbe.forEach((narudzba) => {
+      const row = `<tr>
+        <td>${narudzba.sifraProizvoda || 'N/A'}</td> <!-- Dodaj prikaz šifre proizvoda -->
+        <td>${new Date(narudzba.datumNarudzbe).toLocaleDateString() || 'N/A'}</td>
+        <td>${narudzba.kupac.naziv || 'N/A'}</td>
+        <td>${narudzba.mjestoKupca?.naziv || 'N/A'}</td>
+        <td>${narudzba.tehnickaPriprema?.status || 'N/A'}</td>
+        <td>${narudzba.cnc?.status || 'N/A'}</td>
+        <td>${narudzba.farbara?.status || 'N/A'}</td>
+        <td>${narudzba.aplikacijaWj?.status || 'N/A'}</td>
+        <td>${narudzba.staklo?.status || 'N/A'}</td>
+        <td>${narudzba.ljepljenje?.status || 'N/A'}</td>
+        <td>${narudzba.zavrsavanje?.status || 'N/A'}</td>
+        <td>
+          <div class="progress-container">
+            <div class="progress-bar" style="width: ${calculateProgress(narudzba)}%;">
+              ${calculateProgress(narudzba)}%
+            </div>
+          </div>
+        </td>
+        <td><a href="/narudzbe/${narudzba._id}" class="btn-details">Detalji</a></td>
+      </tr>`;
+      tableBody.innerHTML += row;
+    });
+  } catch (error) {
+    console.error('Failed to load orders:', error);
   }
-
-  const products = await response.json();
-  console.log(products);  // Provjera učitanih podataka
-
-  const tableBody = document.getElementById('productData');
-  tableBody.innerHTML = '';
-
-  products.forEach((product) => {
-    const kolicina = product.kolicina || 1;  // Osiguravanje da količina nije 0 ili undefined
-
-    const tehnickaPripremaZavrseno = product.tehnickaPriprema?.zavrseno || 0;
-    const cncZavrseno = product.cnc?.zavrseno || 0;
-    const farbaraZavrseno = product.farbara?.zavrseno || 0;
-    const aplikacijaWjZavrseno = product.aplikacijaWj?.zavrseno || 0;
-    const stakloZavrseno = product.staklo?.zavrseno || 0;
-    const ljepljenjeZavrseno = product.ljepljenje?.zavrseno || 0;
-    const zavrsavanjeZavrseno = product.zavrsavanje?.zavrseno || 0;
-
-    const tehnickaPripremaPercentage = Math.round((tehnickaPripremaZavrseno / kolicina) * 100);
-    const cncPercentage = Math.round((cncZavrseno / kolicina) * 100);
-    const farbaraPercentage = Math.round((farbaraZavrseno / kolicina) * 100);
-    const aplikacijaWjPercentage = Math.round((aplikacijaWjZavrseno / kolicina) * 100);
-    const stakloPercentage = Math.round((stakloZavrseno / kolicina) * 100);
-    const ljepljenjePercentage = Math.round((ljepljenjeZavrseno / kolicina) * 100);
-    const zavrsavanjePercentage = Math.round((zavrsavanjeZavrseno / kolicina) * 100);
-
-    const row = `<tr>
-            <td>${product.sifraProizvoda}</td>
-            <td>${new Date(product.datumNarudzbe).toLocaleDateString()}</td>
-            <td>${product.imeKupca}</td>
-            <td>${product.mjestoKupca}</td>
-            <td>${product.materijalVani}</td>
-            <td>${product.bojaVani}</td>
-            <td>${product.materijalUnutra}</td>
-            <td>${product.bojaUnutra}</td>
-            <td>${product.aplikacija}</td>
-            <td>${product.model}</td>
-            <td>${product.staklo}</td>
-            <td>${product.dimenzije}</td>
-            <td>${product.kolicina}</td>
-            <td>${product.napomena}</td>
-            <td>${product.izvedba}</td>
-            <td>${product.tehnickaPriprema?.status || 'N/A'} / ${tehnickaPripremaPercentage}% gotovo</td>
-            <td>${product.cnc?.status || 'N/A'} / ${cncPercentage}% gotovo</td>
-            <td>${product.farbara?.status || 'N/A'} / ${farbaraPercentage}% gotovo</td>
-            <td>${product.aplikacijaWj?.status || 'N/A'} / ${aplikacijaWjPercentage}% gotovo</td>
-            <td>${product.staklo?.status || 'N/A'} / ${stakloPercentage}% gotovo</td>
-            <td>${product.ljepljenje?.status || 'N/A'} / ${ljepljenjePercentage}% gotovo</td>
-            <td>${product.zavrsavanje?.status || 'N/A'} / ${zavrsavanjePercentage}% gotovo</td>
-            <td>
-              <div class="progress-container">
-                <div class="progress-bar" style="width: ${calculateProgress(tehnickaPripremaPercentage, cncPercentage, farbaraPercentage, aplikacijaWjPercentage, stakloPercentage, ljepljenjePercentage, zavrsavanjePercentage)}%;">
-                  ${calculateProgress(tehnickaPripremaPercentage, cncPercentage, farbaraPercentage, aplikacijaWjPercentage, stakloPercentage, ljepljenjePercentage, zavrsavanjePercentage)}%
-                </div>
-              </div>
-            </td>
-        </tr>`;
-    tableBody.innerHTML += row;
-  });
 });
 
-function calculateProgress(tehnickaPriprema, cnc, farbara, aplikacijaWj, staklo, ljepljenje, zavrsavanje) {
-  const totalProgress = tehnickaPriprema + cnc + farbara + aplikacijaWj + staklo + ljepljenje + zavrsavanje;
-  return Math.round(totalProgress / 7);
+
+// Funkcija za izračunavanje postotka napretka narudžbe
+function calculateProgress(narudzba) {
+  const stages = [
+    narudzba.tehnickaPriprema?.status === 'zavrseno' ? 1 : 0,
+    narudzba.cnc?.status === 'zavrseno' ? 1 : 0,
+    narudzba.farbara?.status === 'zavrseno' ? 1 : 0,
+    narudzba.aplikacijaWj?.status === 'zavrseno' ? 1 : 0,
+    narudzba.staklo?.status === 'zavrseno' ? 1 : 0,
+    narudzba.ljepljenje?.status === 'zavrseno' ? 1 : 0,
+    narudzba.zavrsavanje?.status === 'zavrseno' ? 1 : 0,
+  ];
+  const totalStages = stages.length;
+  const completedStages = stages.reduce((acc, stage) => acc + stage, 0);
+  return Math.round((completedStages / totalStages) * 100);
 }

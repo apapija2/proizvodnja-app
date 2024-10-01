@@ -1,0 +1,177 @@
+<h1>Uredi Narudžbu</h1>
+
+<div class="narudzba-form-container">
+    <form action="/narudzbe/<%= narudzba._id %>?_method=PUT" method="POST">
+
+    <!-- Šifra Proizvoda -->
+    <div class="form-group">
+      <label for="sifraProizvoda">Šifra Proizvoda:</label>
+      <input type="text" id="sifraProizvoda" name="sifraProizvoda" value="<%= narudzba.sifraProizvoda %>" readonly>
+    </div>
+
+<!-- Kupac dropdown -->
+<div class="form-group">
+    <label for="kupac">Kupac:</label>
+    <select id="kupac" name="kupac" required>
+      <% kupci.forEach(kupac => { %>
+        <option value="<%= kupac._id %>" <%= kupac._id.equals(narudzba.kupac._id) ? 'selected' : '' %>><%= kupac.naziv %></option>
+      <% }) %>
+    </select>
+  </div>
+
+    <!-- Materijal Vani -->
+    <div class="form-group">
+      <label for="materijalVani">Materijal Vani:</label>
+      <select id="materijalVani" name="materijalVani" required>
+        <% materijaliVani.forEach(materijal => { %>
+          <option value="<%= materijal._id %>" <%= materijal._id.equals(narudzba.materijalVani._id) ? 'selected' : '' %>><%= materijal.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Boja Vani -->
+    <div class="form-group">
+      <label for="bojaVani">Boja Vani:</label>
+      <select id="bojaVani" name="bojaVani" required>
+        <% bojeVani.forEach(boja => { %>
+          <option value="<%= boja._id %>" <%= boja._id.equals(narudzba.bojaVani._id) ? 'selected' : '' %>><%= boja.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Materijal Unutra -->
+    <div class="form-group">
+      <label for="materijalUnutra">Materijal Unutra:</label>
+      <select id="materijalUnutra" name="materijalUnutra" required>
+        <% materijaliUnutra.forEach(materijal => { %>
+          <option value="<%= materijal._id %>" <%= materijal._id.equals(narudzba.materijalUnutra._id) ? 'selected' : '' %>><%= materijal.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Boja Unutra -->
+    <div class="form-group">
+      <label for="bojaUnutra">Boja Unutra:</label>
+      <select id="bojaUnutra" name="bojaUnutra" required>
+        <% bojeUnutra.forEach(boja => { %>
+          <option value="<%= boja._id %>" <%= boja._id.equals(narudzba.bojaUnutra._id) ? 'selected' : '' %>><%= boja.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Aplikacija -->
+    <div class="form-group">
+      <label for="aplikacija">Aplikacija:</label>
+      <select id="aplikacija" name="aplikacija" required>
+        <% aplikacije.forEach(aplikacija => { %>
+          <option value="<%= aplikacija._id %>" <%= aplikacija._id.equals(narudzba.aplikacija._id) ? 'selected' : '' %>><%= aplikacija.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Model -->
+    <div class="form-group">
+      <label for="model">Model:</label>
+      <select id="model" name="model" required>
+        <% modeli.forEach(model => { %>
+          <option value="<%= model._id %>" <%= model._id.equals(narudzba.model._id) ? 'selected' : '' %>><%= model.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Staklo -->
+    <div class="form-group">
+      <label for="staklo">Staklo:</label>
+      <select id="staklo" name="staklo" required>
+        <% stakla.forEach(staklo => { %>
+          <option value="<%= staklo._id %>" <%= staklo._id.equals(narudzba.staklo._id) ? 'selected' : '' %>><%= staklo.naziv %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Dimenzije -->
+    <div class="form-group">
+      <label for="dimenzije">Dimenzije:</label>
+      <input type="text" id="dimenzije" name="dimenzije" value="<%= narudzba.dimenzije %>" required>
+    </div>
+
+    <!-- Količina -->
+    <div class="form-group">
+      <label for="kolicina">Količina:</label>
+      <input type="number" id="kolicina" name="kolicina" value="<%= narudzba.kolicina %>" required>
+    </div>
+
+
+    <div class="form-group">
+        <label for="datumNarudzbe">Datum Narudžbe:</label>
+        <input type="date" id="datumNarudzbe" name="datumNarudzbe"
+          value="<%= narudzba.datumNarudzbe ? new Date(narudzba.datumNarudzbe).toISOString().substring(0, 10) : '' %>" required>
+      </div>
+      
+      
+      <div class="form-group">
+        <label for="planiratniZavrsetak">Planirani Završetak:</label>
+        <input type="date" id="planiratniZavrsetak" name="planiratniZavrsetak"
+          value="<%= narudzba.planiratniZavrsetak ? narudzba.planiratniZavrsetak.toISOString().substring(0, 10) : '' %>" required>
+      </div>
+    <!-- Status -->
+    <div class="form-group">
+      <label for="status">Status:</label>
+      <select id="status" name="status" required>
+        <option value="Na čekanju" <%= narudzba.status === 'Na čekanju' ? 'selected' : '' %>>Na čekanju</option>
+        <option value="U izradi" <%= narudzba.status === 'U izradi' ? 'selected' : '' %>>U izradi</option>
+        <option value="Završeno" <%= narudzba.status === 'Završeno' ? 'selected' : '' %>>Završeno</option>
+      </select>
+    </div>
+
+    <!-- Napomena -->
+    <div class="form-group">
+      <label for="napomena">Napomena:</label>
+      <textarea id="napomena" name="napomena"><%= narudzba.napomena %></textarea>
+    </div>
+
+    <button type="submit" class="submit-button">Spremi Promjene</button>
+  </form>
+</div>
+
+<!-- Styling -->
+<style>
+  .narudzba-form-container {
+    margin: 0 auto;
+    width: 60%;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .submit-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+</style>

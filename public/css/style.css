@@ -2,13 +2,16 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f9;
   color: #333;
-  font-size: 12px;
+  
 }
 
 .container {
   max-width: 95%;
   margin: 0 auto;
   padding: 20px;
+  font-size: 12px;
+  
+
 }
 
 .table {
@@ -78,16 +81,14 @@ h2 {
   margin-left: auto;
   margin-right: auto;
 }
-.navbar-brand {
-  font-weight: bold;
-}
+
 
 .container {
   padding-top: 50px;
 }
 
-.dropdown-menu {
-  min-width: 200px;
+.table table-striped{
+  font-size: 12px;
 }
 
 .form-control {
@@ -97,3 +98,102 @@ h2 {
 .btn-primary {
   margin-top: 10px;
 }
+/* GitHub-like navbar styles */
+/* GitHub-like navbar styles */
+.navbar {
+  font-family: Arial, sans-serif;
+  background-color: #24292e; /* Dark GitHub-like background */
+  padding: 10px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.navbar-brand {
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand svg {
+  margin-right: 10px;
+}
+
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+}
+
+.navbar .dropdown-menu {
+  background-color: #2f363d;
+}
+
+.navbar .dropdown-item {
+  color: #fff !important;
+  padding: 10px 20px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-toggler {
+  border: none;
+}
+
+.navbar-toggler-icon {
+  color: #fff;
+}
+
+/* Logout button */
+.navbar-nav .nav-link svg {
+  margin-right: 5px;
+}
+/* Login page styling */
+.login-container {
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+

@@ -3,41 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tehnička Priprema - Ažuriranje statusa</title>
-  <!-- Bootstrap CSS -->
+  <title>Tehnička priprema</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="/css/proizvodnja.css">
+  <script src="/js/main.js"></script>
+
 </head>
 <body>
-  <div class="container custom-container">
-    <h2>Ažuriranje Tehnička Priprema statusa</h2>
-    <form id="tehnickaPripremaForm">
+  <%- include('partials/navbar') %>
+
+  <div class="container mt-5">
+    <h1 class="text-center">Tehnička priprema</h1>
+
+    <!-- Forma za tehničku pripremu -->
+    <form id="tehnickaPripremaForm" method="POST" action="/tehnicka-priprema">
       <div class="mb-3">
-        <label for="productId" class="form-label">ID Proizvoda</label>
-        <select id="productId" class="form-select" required>
-          <!-- Opcije će biti dodane dinamički pomoću JS -->
+        <label for="productId" class="form-label">Odaberi narudžbu:</label>
+        <select id="productId" name="productId" class="form-control" required>
+          <% narudzbas.forEach(function(narudzba) { %>
+            <option value="<%= narudzba._id %>" data-kolicina="<%= narudzba.kolicina %>">
+              <%= narudzba.sifraProizvoda || 'Bez šifre' %> - <%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %>, <%= narudzba.mjestoKupca ? narudzba.mjestoKupca.naziv : 'N/A' %>
+            </option>
+          <% }); %>
         </select>
       </div>
+      
       <div class="mb-3">
-        <label for="tehnickaPripremaStatus" class="form-label">Status Tehnička Priprema</label>
-        <select id="tehnickaPripremaStatus" class="form-select" required>
+        <label for="tehnickaPripremaStatus" class="form-label">Status tehničke pripreme:</label>
+        <select id="tehnickaPripremaStatus" name="status" class="form-control" required>
           <option value="Nije u izradi">Nije u izradi</option>
           <option value="U izradi">U izradi</option>
-          <option value="Gotov">Gotov</option>
+          <option value="Gotovo">Gotovo</option>
         </select>
       </div>
+
       <div class="mb-3">
-        <label for="tehnickaPripremaZavrseno" class="form-label">Završeno komada</label>
-        <input type="number" class="form-control" id="tehnickaPripremaZavrseno" min="0" required>
-        <small id="quantityHelp" class="form-text text-muted"></small>
+        <label for="tehnickaPripremaZavrseno" class="form-label">Završeno:</label>
+        <input type="number" id="tehnickaPripremaZavrseno" name="zavrseno" class="form-control" required>
+        <small id="quantityHelp" class="form-text text-muted">Maximalan broj komada: <span id="maxKolicina">0</span></small>
       </div>
-      <button type="submit" class="btn btn-primary w-100">Ažuriraj</button>
+
+      <button type="submit" class="btn btn-primary">Spremi</button>
     </form>
+
+    <!-- Popis narudžbi ispod forme -->
+    <h2 class="mt-5">Popis narudžbi</h2>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Šifra proizvoda</th>
+          <th>Datum narudžbe</th>
+          <th>Kupac</th>
+          <th>Mjesto</th>
+          <th>Planirani završetak</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% narudzbas.forEach(function(narudzba) { %>
+          <tr>
+            <td><%= narudzba.sifraProizvoda %></td>
+            <td><%= narudzba.datumNarudzbe ? narudzba.datumNarudzbe.toLocaleDateString() : 'N/A' %></td>
+            <td><%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></td>
+            <td><%= narudzba.mjestoKupca ? narudzba.mjestoKupca.naziv : 'N/A' %></td>
+            <td><%= narudzba.planiratniZavrsetak ? narudzba.planiratniZavrsetak.toLocaleDateString() : 'N/A' %></td>
+            <td><%= narudzba.status %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Bootstrap JS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const productSelect = document.getElementById('productId');
+      const quantityInput = document.getElementById('tehnickaPripremaZavrseno');
+      const quantityHelp = document.getElementById('quantityHelp');
+      const maxKolicinaSpan = document.getElementById('maxKolicina');
+
+      function updateMaxQuantity() {
+        const selectedOption = productSelect.options[productSelect.selectedIndex];
+        const maxKolicina = selectedOption.dataset.kolicina;
+        maxKolicinaSpan.textContent = maxKolicina;
+        quantityInput.max = maxKolicina;
+      }
+
+      productSelect.addEventListener('change', updateMaxQuantity);
+
+      updateMaxQuantity(); // Pozovi na početku da postavi početne vrijednosti
+    });
+  </script>
+<script>
+  fetchProtectedData('/tehnicka-priprema');
+</script>
+<script src="/js/main.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/tehnicka-priprema.js"></script>
 </body>
 </html>

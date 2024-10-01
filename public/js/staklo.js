@@ -2,48 +2,46 @@ document.addEventListener('DOMContentLoaded', async function () {
   const productSelect = document.getElementById('productId');
   const quantityInput = document.getElementById('stakloZavrseno');
   const quantityHelp = document.getElementById('quantityHelp');
-  const progressPercentage = document.getElementById('progressPercentage');
   let selectedProduct = null;
 
-  const response = await fetch('/api/product', {
-    headers: {
-      'auth-token': localStorage.getItem('token'),
-    },
+  // Fetch all orders
+  const response = await fetch('/api/narudzba', {
+
   });
 
   if (!response.ok) {
-    console.error('Failed to load products:', response.statusText);
+    console.error('Failed to load orders:', response.statusText);
     return;
   }
 
-  const products = await response.json();
+  const narudzbe = await response.json();
 
-  products.forEach((product, index) => {
+  // Populate the dropdown with orders
+  narudzbe.forEach((narudzba, index) => {
     const option = document.createElement('option');
-    option.value = product._id;
-    option.textContent = product.sifraProizvoda;
-    option.dataset.kolicina = product.kolicina;
+    option.value = narudzba._id;
+    option.textContent = narudzba.sifraProizvoda;
+    option.dataset.kolicina = narudzba.kolicina;
     productSelect.appendChild(option);
 
+    // Automatically select the first order and set selectedProduct
     if (index === 0) {
-      productSelect.value = product._id;
-      selectedProduct = product;
+      productSelect.value = narudzba._id;
+      selectedProduct = narudzba;
       quantityHelp.textContent = `Maximalan broj komada: ${selectedProduct.kolicina}`;
       quantityInput.max = selectedProduct.kolicina;
-      updateProgress(selectedProduct);
     }
   });
 
+  // Update selected order when changed
   productSelect.addEventListener('change', function () {
-    selectedProduct = products.find(p => p._id === this.value);
+    selectedProduct = narudzbe.find(p => p._id === this.value);
     if (selectedProduct) {
       quantityHelp.textContent = `Maximalan broj komada: ${selectedProduct.kolicina}`;
       quantityInput.max = selectedProduct.kolicina;
-      updateProgress(selectedProduct);
     } else {
       quantityHelp.textContent = '';
       quantityInput.max = 0;
-      progressPercentage.textContent = '';
     }
   });
 
@@ -51,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     e.preventDefault();
 
     if (!selectedProduct) {
-      alert('Molimo odaberite proizvod.');
+      alert('Molimo odaberite narudžbu.');
       return;
     }
 
@@ -64,11 +62,10 @@ document.addEventListener('DOMContentLoaded', async function () {
       return;
     }
 
-    const response = await fetch(`/api/product/${productId}/staklo`, {
+    const response = await fetch(`/api/narudzba/${productId}/staklo`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('token'),
       },
       body: JSON.stringify({ status, zavrseno }),
     });
@@ -77,14 +74,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (response.ok) {
       alert('Podaci uspješno ažurirani!');
-      updateProgress(data);
     } else {
       alert(data.error || 'Došlo je do greške pri ažuriranju podataka.');
     }
   });
-
-  function updateProgress(product) {
-    const percentage = Math.round((product.staklo.zavrseno / product.kolicina) * 100);
-    progressPercentage.textContent = `Progres: ${percentage}%`;
-  }
 });

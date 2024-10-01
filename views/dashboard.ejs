@@ -1,4 +1,102 @@
-<%- include('layout', { title: 'Dashboard' }) %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proizvodnja App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .progress-container {
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background-color: #4caf50;
+      height: 20px;
+    }
+    .btn-details {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+    .btn-details:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="/js/main.js"></script>
 
-<h1>Dobrodošli na Dashboard!</h1>
-<p>Izaberite opciju iz navigacijskog menija.</p>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Proizvodnja App</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/narudzbe">Narudžbe</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Šifranti
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/sifrant-kupac">Kupac</a></li>
+              <li><a class="dropdown-item" href="/sifrant-mjesto">Mjesto</a></li>
+              <li><a class="dropdown-item" href="/sifrant-materijal-vani">Materijal Vani</a></li>
+              <li><a class="dropdown-item" href="/sifrant-boja-vani">Boja Vani</a></li>
+              <li><a class="dropdown-item" href="/sifrant-materijal-unutra">Materijal Unutra</a></li>
+              <li><a class="dropdown-item" href="/sifrant-boja-unutra">Boja Unutra</a></li>
+              <li><a class="dropdown-item" href="/sifrant-aplikacija">Aplikacija</a></li>
+              <li><a class="dropdown-item" href="/sifrant-model">Model</a></li>
+              <li><a class="dropdown-item" href="/sifrant-staklo">Staklo</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Pregled stanja proizvodnje</h2>
+    <div id="productTable" class="table-responsive">
+      <table class="table table-bordered table-hover table-sm">
+        <thead>
+          <tr>
+            <th>Kod</th>
+            <th>Datum narudžbe</th>
+            <th>Ime kupca</th>
+            <th>Mjesto kupca</th>
+            <th>Status tehničke pripreme</th>
+            <th>Status CNC</th>
+            <th>Status farbara</th>
+            <th>Status aplikacija_wj</th>
+            <th>Status staklo</th>
+            <th>Status ljepljenje</th>
+            <th>Status završavanje</th>
+            <th>Progres (%)</th>
+            <th>Detalji</th>
+          </tr>
+        </thead>
+        <tbody id="productData">
+          <!-- Rows will be populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

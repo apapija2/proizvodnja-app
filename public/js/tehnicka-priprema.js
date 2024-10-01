@@ -2,45 +2,43 @@ document.addEventListener('DOMContentLoaded', async function () {
   const productSelect = document.getElementById('productId');
   const quantityInput = document.getElementById('tehnickaPripremaZavrseno');
   const quantityHelp = document.getElementById('quantityHelp');
-  let selectedProduct = null;
+  let selectedNarudzba = null;
 
-  // Fetch all products
-  const response = await fetch('/api/product', {
-    headers: {
-      'auth-token': localStorage.getItem('token'),
-    },
+  // Fetch all narudzbas (umjesto products)
+  const response = await fetch('/api/narudzbas', {  // Ažurirana ruta za narudzbas
+
   });
 
   if (!response.ok) {
-    console.error('Failed to load products:', response.statusText);
+    console.error('Failed to load narudzbas:', response.statusText);
     return;
   }
 
-  const products = await response.json();
+  const narudzbas = await response.json();
 
-  // Populate the dropdown with products
-  products.forEach((product, index) => {
+  // Populate the dropdown with narudzbas
+  narudzbas.forEach((narudzba, index) => {
     const option = document.createElement('option');
-    option.value = product._id;
-    option.textContent = product.sifraProizvoda;
-    option.dataset.kolicina = product.kolicina;
+    option.value = narudzba._id;  // Koristi narudzba._id za vrijednost opcije
+    option.textContent = narudzba.sifraProizvoda || 'Bez šifre';  // Prikazuje šifru proizvoda ili 'Bez šifre' ako nije definirano
+    option.dataset.kolicina = narudzba.kolicina;
     productSelect.appendChild(option);
 
-    // Automatically select the first product and set selectedProduct
+    // Automatski odaberi prvu narudzbu
     if (index === 0) {
-      productSelect.value = product._id;
-      selectedProduct = product;
-      quantityHelp.textContent = `Maximalan broj komada: ${selectedProduct.kolicina}`;
-      quantityInput.max = selectedProduct.kolicina;
+      productSelect.value = narudzba._id;
+      selectedNarudzba = narudzba;
+      quantityHelp.textContent = `Maximalan broj komada: ${selectedNarudzba.kolicina}`;
+      quantityInput.max = selectedNarudzba.kolicina;
     }
   });
 
-  // Update selected product when changed
+  // Ažuriraj odabranu narudzbu
   productSelect.addEventListener('change', function () {
-    selectedProduct = products.find(p => p._id === this.value);
-    if (selectedProduct) {
-      quantityHelp.textContent = `Maximalan broj komada: ${selectedProduct.kolicina}`;
-      quantityInput.max = selectedProduct.kolicina;
+    selectedNarudzba = narudzbas.find(n => n._id === this.value);
+    if (selectedNarudzba) {
+      quantityHelp.textContent = `Maximalan broj komada: ${selectedNarudzba.kolicina}`;
+      quantityInput.max = selectedNarudzba.kolicina;
     } else {
       quantityHelp.textContent = '';
       quantityInput.max = 0;
@@ -50,25 +48,24 @@ document.addEventListener('DOMContentLoaded', async function () {
   document.getElementById('tehnickaPripremaForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    if (!selectedProduct) {
-      alert('Molimo odaberite proizvod.');
+    if (!selectedNarudzba) {
+      alert('Molimo odaberite narudžbu.');
       return;
     }
 
-    const productId = productSelect.value;
+    const narudzbaId = productSelect.value;
     const status = document.getElementById('tehnickaPripremaStatus').value;
     const zavrseno = parseInt(quantityInput.value);
 
-    if (zavrseno > selectedProduct.kolicina) {
+    if (zavrseno > selectedNarudzba.kolicina) {
       alert('Broj dovršenih komada ne može biti veći od ukupne količine!');
       return;
     }
 
-    const response = await fetch(`/api/product/${productId}/tehnicka-priprema`, {
+    const response = await fetch(`/api/narudzba/${narudzbaId}/tehnicka-priprema`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('token'),
       },
       body: JSON.stringify({ status, zavrseno }),
     });

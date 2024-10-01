@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
-const KupacSchema = new mongoose.Schema({
-  naziv: { type: String, required: true, unique: true }  // Osigurava da "naziv" mora biti jedinstven i ne smije biti prazan
-}, {
-  collection: 'kupacs'  // Kolekcija u bazi podataka
+const kupacSchema = new mongoose.Schema({
+  naziv: { type: String, required: true }
 });
 
-module.exports = mongoose.model('Kupac', KupacSchema);
+module.exports = mongoose.model('Kupac', kupacSchema);
+

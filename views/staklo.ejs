@@ -1,47 +1,72 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Staklo - Ažuriranje statusa</title>
-  <!-- Bootstrap CSS -->
+  <title>Staklo - Narudžbe</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="/css/proizvodnja.css">
+  <script src="/js/main.js"></script>
+
 </head>
 <body>
-  <div class="container custom-container">
-    <h2>Ažuriranje statusa stakla</h2>
-    <form id="stakloForm">
+
+  <%- include('partials/navbar') %>
+
+  <div class="container mt-5">
+    <h1 class="text-center">Staklo - Ažuriranje statusa</h1>
+  
+    <form id="stakloForm" action="/staklo" method="POST">
       <div class="mb-3">
-        <label for="productId" class="form-label">ID Proizvoda</label>
-        <select id="productId" class="form-select" required>
-          <!-- Opcije će biti dodane dinamički pomoću JS -->
+        <label for="productId" class="form-label">Narudžba:</label>
+        <select id="productId" name="productId" class="form-control">
+          <% narudzbas.forEach(function(narudzba) { %>
+            <option value="<%= narudzba._id %>"><%= narudzba.sifraProizvoda || 'Bez šifre' %> - <%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></option>
+          <% }); %>
         </select>
       </div>
+  
       <div class="mb-3">
-        <label for="statusStatus" class="form-label">Status Stakla</label>
-        <select id="stakloStatus" class="form-select" required>
+        <label for="stakloStatus" class="form-label">Status:</label>
+        <select id="stakloStatus" name="status" class="form-control">
           <option value="Nije u izradi">Nije u izradi</option>
           <option value="U izradi">U izradi</option>
-          <option value="Gotov">Gotov</option>
+          <option value="Gotovo">Gotovo</option>
         </select>
       </div>
+  
       <div class="mb-3">
-        <label for="stakloZavrseno" class="form-label">Završeno komada</label>
-        <input type="number" class="form-control" id="stakloZavrseno" min="0" required>
-        <small id="quantityHelp" class="form-text text-muted"></small>
+        <label for="stakloZavrseno" class="form-label">Broj završenih komada:</label>
+        <input type="number" id="stakloZavrseno" name="zavrseno" class="form-control">
       </div>
-      <div id="progressPercentage" class="mb-3 text-center"></div>
-      <button type="submit" class="btn btn-primary w-100">Ažuriraj</button>
+  
+      <button type="submit" class="btn btn-primary">Spremi</button>
     </form>
+  
+    <h2 class="mt-5">Popis narudžbi</h2>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Kupac</th>
+          <th>Mjesto</th>
+          <th>Status</th>
+          <th>Završeno</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% narudzbas.forEach(function(narudzba) { %>
+          <tr>
+            <td><%= narudzba.kupac ? narudzba.kupac.naziv : 'N/A' %></td>
+            <td><%= narudzba.mjestoKupca ? narudzba.mjestoKupca.naziv : 'N/A' %></td>
+            <td><%= narudzba.statusStaklo.status %></td>
+            <td><%= narudzba.statusStaklo.zavrseno %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/staklo.js"></script>
-</body>
-</html>
+  <script>
+    fetchProtectedData('/staklo');
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>

@@ -1,34 +1,55 @@
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
-const NarudzbaSchema = new mongoose.Schema({
-  sifraProizvoda: { type: String, required: true, unique: true },
+const narudzbaSchema = new mongoose.Schema({
+  sifraProizvoda: { type: Number },
   datumNarudzbe: { type: Date, required: true },
-  planiraniZavrsetak: { type: Date, required: true },
+  planiratniZavrsetak: { type: Date, required: true },
   kupac: { type: mongoose.Schema.Types.ObjectId, ref: 'Kupac', required: true },
   mjestoKupca: { type: mongoose.Schema.Types.ObjectId, ref: 'Mjesto', required: true },
-  materijalVani: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterijalVani', required: true },
-  bojaVani: { type: mongoose.Schema.Types.ObjectId, ref: 'BojaVani', required: true },
-  materijalUnutra: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterijalUnutra', required: true },
-  bojaUnutra: { type: mongoose.Schema.Types.ObjectId, ref: 'BojaUnutra', required: true },
-  aplikacija: { type: mongoose.Schema.Types.ObjectId, ref: 'Aplikacija', required: true },
-  model: { type: mongoose.Schema.Types.ObjectId, ref: 'Model', required: true },
-  staklo: { type: mongoose.Schema.Types.ObjectId, ref: 'Staklo', required: true },
+  materijalVani: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterijalVani' },
+  bojaVani: { type: mongoose.Schema.Types.ObjectId, ref: 'BojaVani' },
+  materijalUnutra: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterijalUnutra' },
+  bojaUnutra: { type: mongoose.Schema.Types.ObjectId, ref: 'BojaUnutra' },
+  aplikacija: { type: mongoose.Schema.Types.ObjectId, ref: 'Aplikacija' },
+  model: { type: mongoose.Schema.Types.ObjectId, ref: 'Model' },
+  staklo: { type: mongoose.Schema.Types.ObjectId, ref: 'Staklo' },  // Polje za referencu na staklo model
   dimenzije: { type: String, required: true },
   kolicina: { type: Number, required: true },
   napomena: { type: String },
   izvedba: { type: String },
-  statusTehnickaPriprema: { type: String, default: 'Nije u izvedbi' },
-  statusCNC: { type: String, default: 'Nije u izvedbi' },
-  statusFarbara: { type: String, default: 'Nije u izvedbi' },
-  statusAplikacijaWJ: { type: String, default: 'Nije u izvedbi' },
-  statusStaklo: { type: String, default: 'Nije u izvedbi' },
-  statusLjepljenje: { type: String, default: 'Nije u izvedbi' },
-  statusZavrsavanje: { type: String, default: 'Nije u izvedbi' },
-  status: { 
-    type: String, 
-    enum: ['Nije prihvaćeno', 'Na čekanju', 'Prihvaćeno'], 
-    default: 'Na čekanju' 
+  status: { type: String, default: 'Na čekanju' },
+  tehnickaPriprema: {
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
   },
-}, { collection: 'products' });  // Ovo definira ime kolekcije "products"
+  cnc: {
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  },
+  farbara: {
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  },
+  aplikacijaWJ: {  // Ovdje koristimo ispravno ime za aplikaciju-wj
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  },
+  statusStaklo: {  // Preimenovano kako bi izbjegli konflikt sa staklo referencom
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  },
+  ljepljenje: {
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  },
+  zavrsavanje: {
+    status: { type: String, default: 'Nije započeto' },
+    zavrseno: { type: Number, default: 0 }
+  }
+});
 
-module.exports = mongoose.model('Narudzba', NarudzbaSchema);
+// Automatsko inkrementiranje za polje 'sifraProizvoda'
+narudzbaSchema.plugin(AutoIncrement, { inc_field: 'sifraProizvoda' });
+
+module.exports = mongoose.model('Narudzba', narudzbaSchema);

@@ -5,152 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Narudžbe</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/proizvodnja.css"> <!-- Dodaj svoj CSS ako je potrebno -->
+  <link rel="stylesheet" href="/css/proizvodnja.css"> 
+  <link rel="stylesheet" href="/css/style.css"> 
 </head>
 <body>
+  <%- include('partials/navbar') %>
   <div class="container mt-5">
-    <h1 class="text-center">Unos nove narudžbe</h1>
-
-    <!-- Forma za unos nove narudžbe -->
-    <form action="/api/narudzbe" method="POST" class="mt-4">
-      <div class="row mb-3">
-        <div class="col">
-          <label for="kupac" class="form-label">Kupac:</label>
-          <select id="kupac" name="kupac" class="form-control" required>
-            <% kupci.forEach(function(kupac) { %>
-              <option value="<%= kupac._id %>"><%= kupac.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="col">
-          <label for="mjesto" class="form-label">Mjesto:</label>
-          <select id="mjesto" name="mjestoKupca" class="form-control" required>
-            <% mjesta.forEach(function(mjesto) { %>
-              <option value="<%= mjesto._id %>"><%= mjesto.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col">
-          <label for="materijalVani" class="form-label">Materijal Vani:</label>
-          <select id="materijalVani" name="materijalVani" class="form-control" required>
-            <% materijaliVani.forEach(function(materijal) { %>
-              <option value="<%= materijal._id %>"><%= materijal.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="col">
-          <label for="bojaVani" class="form-label">Boja Vani:</label>
-          <select id="bojaVani" name="bojaVani" class="form-control" required>
-            <% bojeVani.forEach(function(boja) { %>
-              <option value="<%= boja._id %>"><%= boja.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col">
-          <label for="materijalUnutra" class="form-label">Materijal Unutra:</label>
-          <select id="materijalUnutra" name="materijalUnutra" class="form-control" required>
-            <% materijaliUnutra.forEach(function(materijal) { %>
-              <option value="<%= materijal._id %>"><%= materijal.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="col">
-          <label for="bojaUnutra" class="form-label">Boja Unutra:</label>
-          <select id="bojaUnutra" name="bojaUnutra" class="form-control" required>
-            <% bojeUnutra.forEach(function(boja) { %>
-              <option value="<%= boja._id %>"><%= boja.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col">
-          <label for="aplikacija" class="form-label">Aplikacija:</label>
-          <select id="aplikacija" name="aplikacija" class="form-control" required>
-            <% aplikacije.forEach(function(aplikacija) { %>
-              <option value="<%= aplikacija._id %>"><%= aplikacija.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="col">
-          <label for="model" class="form-label">Model:</label>
-          <select id="model" name="model" class="form-control" required>
-            <% modeli.forEach(function(model) { %>
-              <option value="<%= model._id %>"><%= model.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col">
-          <label for="staklo" class="form-label">Staklo:</label>
-          <select id="staklo" name="staklo" class="form-control" required>
-            <% stakla.forEach(function(staklo) { %>
-              <option value="<%= staklo._id %>"><%= staklo.naziv %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <label for="dimenzije" class="form-label">Dimenzije:</label>
-        <input type="text" id="dimenzije" name="dimenzije" class="form-control" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="kolicina" class="form-label">Količina:</label>
-        <input type="number" id="kolicina" name="kolicina" class="form-control" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="napomena" class="form-label">Napomena:</label>
-        <textarea id="napomena" name="napomena" class="form-control"></textarea>
-      </div>
-
-      <div class="mb-3">
-        <label for="planiraniZavrsetak" class="form-label">Planirani završetak:</label>
-        <input type="date" id="planiraniZavrsetak" name="planiraniZavrsetak" class="form-control" required>
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100">Spremi narudžbu</button>
-    </form>
-
-    <!-- Prikaz postojećih narudžbi -->
-    <h2 class="mt-5">Popis narudžbi</h2>
-    <table class="table table-striped mt-3">
-      <thead>
-        <tr>
-          <th>Šifra</th>
-          <th>Datum narudžbe</th>
-          <th>Kupac</th>
-          <th>Mjesto</th>
-          <th>Planirani završetak</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% narudzbe.forEach(function(narudzba) { %>
+    <h1 class="text-center">Popis narudžbi</h1>
+    
+    <!-- Button to open form for adding a new order -->
+    <div class="text-end mb-3">
+      <a href="/narudzbe/new" class="btn btn-primary">Dodaj novu narudžbu</a>
+    </div>
+  
+    <!-- Display table of orders -->
+      <table class="table table-striped"  id="slova" border="1">
+        <thead>
           <tr>
-            <td><%= narudzba.sifraProizvoda %></td>
-            <td><%= narudzba.datumNarudzbe.toLocaleDateString() %></td>
-            <td><%= narudzba.kupac.naziv %></td>
-            <td><%= narudzba.mjestoKupca.naziv %></td>
-            <td><%= narudzba.planiraniZavrsetak.toLocaleDateString() %></td>
-            <td><%= narudzba.status %></td>
+            <th>Šifra Proizvoda</th>
+            <th>Datum Narudžbe</th>
+            <th>Planirani Završetak</th>
+            <th>Kupac</th>
+            <th>Mjesto Kupca</th>
+            <th>Materijal Vani</th>
+            <th>Boja Vani</th>
+            <th>Materijal Unutra</th>
+            <th>Boja Unutra</th>
+            <th>Aplikacija</th>
+            <th>Model</th>
+            <th>Staklo</th>
+            <th>Dimenzije</th>
+            <th>Količina</th>
+            <th>Napomena</th>
+            <th>Status</th>
+            
+            <th>Akcije</th> <!-- New column for Edit and Delete buttons -->
           </tr>
-        <% }); %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% narudzbe.forEach(narudzba => { %>
+            <tr>
+              <td><%= narudzba.sifraProizvoda %></td>
+              <td><%= narudzba.datumNarudzbe.toDateString() %></td>
+              <td><%= narudzba.planiratniZavrsetak.toDateString() %></td>
+              <td><%= narudzba.kupac.naziv %></td>
+              <td><%= narudzba.mjestoKupca.naziv %></td>
+              <td><%= narudzba.materijalVani ? narudzba.materijalVani.naziv : '' %></td>
+              <td><%= narudzba.bojaVani ? narudzba.bojaVani.naziv : '' %></td>
+              <td><%= narudzba.materijalUnutra ? narudzba.materijalUnutra.naziv : '' %></td>
+              <td><%= narudzba.bojaUnutra ? narudzba.bojaUnutra.naziv : '' %></td>
+              <td><%= narudzba.aplikacija ? narudzba.aplikacija.naziv : '' %></td>
+              <td><%= narudzba.model ? narudzba.model.naziv : '' %></td>
+              <td><%= narudzba.staklo ? narudzba.staklo.naziv : '' %></td>
+              <td><%= narudzba.dimenzije %></td>
+              <td><%= narudzba.kolicina %></td>
+              <td><%= narudzba.napomena %></td>
+              <td><%= narudzba.status %></td>
+              
+              
+              <!-- Actions for Edit and Delete -->
+              <td>
+                <a href="/narudzbe/<%= narudzba._id %>/edit">Uredi</a> |
+                <form action="/narudzbe/<%= narudzba._id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button type="submit" onclick="return confirm('Jeste li sigurni da želite obrisati ovu narudžbu?')">Obriši</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html>  

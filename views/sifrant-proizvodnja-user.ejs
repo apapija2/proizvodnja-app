@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Šifrant Korisnici & CNC Entry</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!-- User Form for Šifrant Korisnici -->
+    <div class="user-form">
+        <h2>Šifrant Korisnici</h2>
+        <form id="user-form">
+            <label for="stage">Stupanj proizvodnje:</label>
+            <select id="stage">
+                <option value="cnc">CNC</option>
+                <option value="farbara">Farbara</option>
+                <option value="tehnicka-priprema">Tehnička Priprema</option>
+                <option value="zavrsavanje">Završavanje</option>
+                <option value="staklo">Staklo</option>
+                <option value="aplikacija-wj">Aplikacija-WJ</option>
+                <option value="ljepljenje">Ljepljenje</option>
+            </select>
+
+            <label for="name">Ime i Prezime:</label>
+            <input type="text" id="name" placeholder="Unesite ime i prezime">
+
+            <button type="submit">Dodaj Korisnika</button>
+        </form>
+    </div>
+
+    <!-- User List -->
+    <div class="user-list">
+        <h2>Popis Korisnika</h2>
+        <ul id="user-list"></ul>
+    </div>
+
+    <!-- CNC Form for Work Entry -->
+    <div class="cnc-form">
+        <h2>CNC - Evidencija rada</h2>
+        <form id="cnc-form">
+            <label for="order">Narudžba:</label>
+            <input type="text" id="order" placeholder="Unesite narudžbu">
+
+            <label for="status">Status:</label>
+            <select id="status">
+                <option value="in-progress">U izradi</option>
+                <option value="finished">Završeno</option>
+            </select>
+
+            <label for="quantity">Broj komada:</label>
+            <input type="number" id="quantity" placeholder="Unesite broj komada">
+
+            <label for="user">Korisnici:</label>
+            <select id="user"></select>
+
+            <button type="submit">Unesi podatke</button>
+        </form>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>

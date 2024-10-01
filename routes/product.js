@@ -1,18 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
-const verifyToken = require('../middleware/verifyToken');
-const authorizeRole = require('../middleware/authorizeRole');
+const authorizeRole = require('../middleware/authorizeRole'); // Correct import for authorizeRole
 
 // Dodavanje novog proizvoda (samo prodaja)
-router.post('/', verifyToken, authorizeRole(['prodaja']), async (req, res) => {
+router.post('/',async (req, res) => {
     const product = new Product(req.body);
     await product.save();
     res.send('Proizvod dodan');
 });
 
 
-// Ruta za dodavanje proizvoda
+// Ruta za dodavanje proizvodaS
 router.post('/', async (req, res) => {
     const { sifraProizvoda, imeProizvoda } = req.body;
     try {
@@ -24,7 +22,7 @@ router.post('/', async (req, res) => {
     }
   });
 // Dohvaćanje svih proizvoda (za dashboard)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     const products = await Product.find();
     res.json(products);
 });
@@ -32,24 +30,25 @@ router.get('/', verifyToken, async (req, res) => {
 // Ažuriranje statusa tehničke pripreme
 
 
-router.put('/:id/tehnicka-priprema', verifyToken, authorizeRole(['tehnicka-priprema']), async (req, res) => {
-    const { status, zavrseno } = req.body;
-    const product = await Product.findById(req.params.id);
-
-    if (zavrseno > product.kolicina) {
-        return res.status(400).json({ error: 'Broj dovršenih komada ne može biti veći od ukupne količine narudžbe.' });
+router.put('/:id/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
+    try {
+      const { status, zavrseno } = req.body;
+      const narudzba = await Narudzba.findById(req.params.id);
+      if (!narudzba) return res.status(404).json({ error: 'Narudžba nije pronađena' });
+  
+      if (zavrseno > narudzba.kolicina) return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
+  
+      narudzba.tehnickaPriprema = { status, zavrseno };
+      await narudzba.save();
+      res.status(200).json({ message: 'Tehnička priprema uspješno ažurirana' });
+    } catch (error) {
+      res.status(500).json({ error: 'Greška pri ažuriranju tehničke pripreme' });
     }
-
-    product.tehnickaPriprema.status = status;
-    product.tehnickaPriprema.zavrseno = zavrseno;
-    await product.save();
-
-    res.json(product);
-});
-
+  });
+  
 
 // Ažuriranje statusa stakla
-router.put('/:id/staklo', verifyToken, authorizeRole(['staklo']), async (req, res) => {
+router.put('/:id/staklo', authorizeRole(['staklo']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -60,7 +59,7 @@ router.put('/:id/staklo', verifyToken, authorizeRole(['staklo']), async (req, re
 });
 
 // CNC
-router.put('/:id/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => {
+router.put('/:id/cnc', authorizeRole(['cnc']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -71,7 +70,7 @@ router.put('/:id/cnc', verifyToken, authorizeRole(['cnc']), async (req, res) => 
 });
 
 // Farbara
-router.put('/:id/farbara', verifyToken, authorizeRole(['farbara']), async (req, res) => {
+router.put('/:id/farbara', authorizeRole(['farbara']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -82,7 +81,7 @@ router.put('/:id/farbara', verifyToken, authorizeRole(['farbara']), async (req, 
 });
 
 // Aplikacija-wj
-router.put('/:id/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), async (req, res) => {
+router.put('/:id/aplikacija-wj', authorizeRole(['aplikacija-wj']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -93,7 +92,7 @@ router.put('/:id/aplikacija-wj', verifyToken, authorizeRole(['aplikacija-wj']), 
 });
 
 // Lijepljenje
-router.put('/:id/ljepljenje', verifyToken, authorizeRole(['ljepljenje']), async (req, res) => {
+router.put('/:id/ljepljenje', authorizeRole(['ljepljenje']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -104,7 +103,7 @@ router.put('/:id/ljepljenje', verifyToken, authorizeRole(['ljepljenje']), async 
 });
 
 // Završavanje
-router.put('/:id/zavrsavanje', verifyToken, authorizeRole(['zavrsavanje']), async (req, res) => {
+router.put('/:id/zavrsavanje', authorizeRole(['zavrsavanje']), async (req, res) => {
     const { status, zavrseno } = req.body;
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -114,7 +113,7 @@ router.put('/:id/zavrsavanje', verifyToken, authorizeRole(['zavrsavanje']), asyn
     res.json(product);
 });
 
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
       const products = await Product.find();
   
