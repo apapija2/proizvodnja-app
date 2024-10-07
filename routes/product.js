@@ -3,24 +3,16 @@ const router = express.Router();
 const authorizeRole = require('../middleware/authorizeRole'); // Correct import for authorizeRole
 
 // Dodavanje novog proizvoda (samo prodaja)
-router.post('/',async (req, res) => {
-    const product = new Product(req.body);
-    await product.save();
-    res.send('Proizvod dodan');
+router.post('/', async (req, res) => {
+  const { sifraProizvoda, imeProizvoda } = req.body;
+  const postojiProizvod = await Product.findOne({ sifraProizvoda });
+  if (postojiProizvod) return res.status(400).json({ error: 'Proizvod s ovom šifrom već postoji.' });
+  
+  const noviProizvod = new Product({ sifraProizvoda, imeProizvoda });
+  await noviProizvod.save();
+  res.status(201).json(noviProizvod);
 });
 
-
-// Ruta za dodavanje proizvodaS
-router.post('/', async (req, res) => {
-    const { sifraProizvoda, imeProizvoda } = req.body;
-    try {
-      const noviProizvod = new Product({ sifraProizvoda, imeProizvoda });
-      await noviProizvod.save();
-      res.status(201).json(noviProizvod);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
 // Dohvaćanje svih proizvoda (za dashboard)
 router.get('/', async (req, res) => {
     const products = await Product.find();

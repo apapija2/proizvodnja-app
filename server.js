@@ -44,12 +44,10 @@ app.use('/api/user', authRoute); // Ruta za autentifikaciju
 app.use('/api/product', productRoute); // Ruta za proizvode
 app.use('/api/sifranti', sifrantiRoute); // Ruta za šifrante
 app.use('/api/narudzbe', narudzbeRoute); // Ruta za narudžbe
-app.use('/aplikacija-wj', authorizeRole(['aplikacija-wj']), (req, res) => res.send('Aplikacija WJ dashboard'));
-app.use('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), (req, res) => res.send('/tehnicka-priprema'));
-
+app.use('/narudzbe', narudzbeRoute);
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_secret_key',
+
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // Set to true if using https
@@ -75,7 +73,11 @@ app.get('/', async (req, res) => {
     
       .populate('tehnickaPriprema')
       .populate('cnc')
-      .populate('farbara');
+      .populate('farbara')
+
+      .populate('staklo')
+      .populate('ljepljenje')
+      .populate('zavrsavanje');
     
     res.render('index', { narudzbe });
   } catch (error) {
@@ -304,6 +306,16 @@ app.get('/api/narudzbe', async (req, res) => {
   try {
     const narudzbe = await Narudzba.find()
       .populate('kupac')
+
+      .populate('materijalVani')
+      .populate('bojaVani')
+      .populate('materijalUnutra')
+      .populate('bojaUnutra')
+      .populate('aplikacija')
+      
+      .populate('model')
+      .populate('staklo')
+
       .populate('mjestoKupca')
       .populate('tehnickaPriprema')
       .populate('cnc')
@@ -322,8 +334,10 @@ app.get('/narudzbe/:id/edit', async (req, res) => {
     const userRole = req.session.user.role; // Assuming you have the user role saved in the session
 
     switch (userRole) {
+      case 'prodaja':
+        return res.redirect('narudzba-edit', { narudzba });
       case 'cnc':
-        return res.redirect(`/cnc/${narudzba._id}`);
+        return res.redirect(`/cnc`);
       case 'tehnicka-priprema':
         return res.redirect(`/tehnicka-priprema/${narudzba._id}`);
       case 'aplikacija-wj':
@@ -557,7 +571,7 @@ app.get('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, 
       .populate('bojaUnutra')
       .populate('aplikacija')
       .populate('model')
-      .populate('staklo'); // Popunjava polje 'stakl'
+      .populate('staklo');
 
     res.render('tehnicka-priprema', { narudzbas });
   } catch (error) {
@@ -567,60 +581,30 @@ app.get('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, 
 });
 
 
-app.post('/tehnicka-priprema', async (req, res) => {
-  try {
-    const { productId, status, zavrseno } = req.body;
 
-    // Pronađi narudžbu po ID-u
-    const narudzba = await Narudzba.findById(productId);
+app.put('/api/narudzba/:id/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
+  try {
+    const { status, zavrseno } = req.body;
+    const narudzba = await Narudzba.findById(req.params.id);
+    
     if (!narudzba) {
       return res.status(404).json({ error: 'Narudžba nije pronađena' });
     }
 
-    // Provjeri da li je uneseni broj završenih komada veći od ukupne količine
     if (zavrseno > narudzba.kolicina) {
       return res.status(400).json({ error: 'Broj završenih komada ne može biti veći od ukupne količine' });
     }
 
-    // Ažuriraj tehFničku pripremu
-    narudzba.tehnickaPriprema = {
-      status: status,
-      zavrseno: zavrseno
-    };
-
-    // Spremi ažuriranu narudžbu
-    await narudzba.save();
-
-    res.redirect('/tehnicka-priprema'); // Nakon unosa preusmjerava natrag na stranicu tehničke pripreme
-  } catch (error) {
-    console.error('Greška pri ažuriranju tehničke pripreme:', error.message);
-    res.status(500).send('Greška pri ažuriranju tehničke pripreme');
-  }
-});
-
-
-app.put('/api/narudzba/:id/tehnicka-priprema', async (req, res) => {
-  try {
-    const { status, zavrseno } = req.body;
-
-    // Pronađi narudžbu po ID-u
-    const narudzba = await Narudzba.findById(req.params.id);
-    if (!narudzba) {
-      return res.status(404).json({ error: 'Narudžba nije pronađena' });
-    }
-
     // Ažuriraj tehničku pripremu
-    narudzba.tehnickaPriprema = {
-      status,
-      zavrseno
-    };
-
+    narudzba.tehnickaPriprema = { status, zavrseno };
     await narudzba.save();
+    
     res.status(200).json({ message: 'Tehnička priprema uspješno ažurirana' });
   } catch (error) {
     res.status(500).json({ error: 'Greška pri ažuriranju tehničke pripreme: ' + error.message });
   }
 });
+
 
 
 // Rute za HTML datoteke

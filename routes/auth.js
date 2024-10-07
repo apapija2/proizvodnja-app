@@ -19,32 +19,14 @@ router.post('/register', async (req, res) => {
 // User login
 // User login
 router.post('/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      const user = await User.findOne({ username });
-  
-      if (!user) {
-        return res.status(401).json({ error: 'Authentication failed: User not found' });
-      }
-  
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-        return res.status(401).json({ error: 'Authentication failed: Incorrect password' });
-      }
-  
-      // If authentication is successful, start a session or return a token
-      req.session.user = {
-        id: user._id,
-        username: user.username,
-        role: user.role
-      };
-      return res.json({ message: 'Login successful', role: user.role });
-  
-    } catch (error) {
-      console.error('Login error:', error);
-      return res.status(500).json({ error: 'Login failed' });
-    }
-  });
+  // Nakon provjere korisnika:
+  if (user) {
+    req.session.user = { id: user._id, username: user.username, role: user.role };
+    return res.redirect(`/${user.role}`);
+  }
+  // Pogreška pri loginu
+});
+
   
 // User logout
 router.post('/logout', (req, res) => {
