@@ -1,4 +1,3 @@
-// File: login.js
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault(); // Prevent form from refreshing the page
 
@@ -22,16 +21,16 @@ document.getElementById('loginForm').addEventListener('submit', async function (
       // Redirect based on user role
       switch (role) {
         case 'cnc':
-          window.location.href = '/cnc'; // Redirect to CNC dashboard
+          window.location.href = '/cnc';
           break;
         case 'tehnicka-priprema':
-          window.location.href = '/tehnicka-priprema'; // Redirect to Tehnička Priprema dashboard
+          window.location.href = '/tehnicka-priprema';
           break;
         case 'aplikacija-wj':
-          window.location.href = '/aplikacija-wj'; // Redirect to Aplikacija WJ dashboard
+          window.location.href = '/aplikacija-wj';
           break;
         default:
-          window.location.href = '/'; // Default redirection
+          window.location.href = '/';
       }
     } else {
       document.getElementById('error-message').style.display = 'block'; // Show error message

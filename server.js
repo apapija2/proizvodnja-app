@@ -25,7 +25,7 @@ const Model = require('./models/Model');
 const Staklo = require('./models/Staklo');
 const authorizeRole = require('./middleware/authorizeRole');
 const session = require('express-session');
-
+const User = require('./models/User');
 // Inicijaliziraj Express aplikaciju
 const app = express();
 
@@ -47,15 +47,24 @@ app.use('/api/narudzbe', narudzbeRoute); // Ruta za narudžbe
 app.use('/narudzbe', narudzbeRoute);
 
 app.use(session({
-
+  secret: process.env.SESSION_SECRET || 'default-secret',  // Ensure SESSION_SECRET is set in .env
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true if using https
+  cookie: { secure: false }  // Set to true if using HTTPS
 }));
 
 // Middleware to populate user session
 app.use((req, res, next) => {
-  res.locals.user = req.session.user;
+  // Skip the check for login and registration routes
+  if (req.path === '/login' || req.path === '/register') {
+    return next();
+  }
+
+  if (!req.session.user) {
+    return res.redirect('/login');  // Redirect if not authenticated
+  }
+
+  res.locals.user = req.session.user;  // Pass user info to views
   next();
 });
 
@@ -92,7 +101,24 @@ app.use(methodOverride('_method'));
 
 app.use('/login', authRoute); // Use auth routes for login
 app.get('/login', (req, res) => {
-  res.render('login'); // This should render login.ejs from the views folder
+  res.render('login');  // This should render login.ejs from the views folder
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    
+    if (user && await bcrypt.compare(req.body.password, user.password)) {
+      req.session.user = { id: user._id, username: user.username, role: user.role };
+      res.redirect('/');
+    } else {
+      console.error('Invalid credentials');
+      res.status(401).send('Invalid credentials');
+    }
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.status(500).send('Internal server error');
+  }
 });
 
 
@@ -142,6 +168,7 @@ app.get('/narudzbe', async (req, res) => {
 });
 
 // Route to render the form for adding a new order (must come before /narudzbe/:id)
+// Route to render the form for adding a new order (must come before /narudzbe/:id)
 app.get('/narudzbe/new', async (req, res) => {
   try {
     const kupci = await Kupac.find();
@@ -154,9 +181,19 @@ app.get('/narudzbe/new', async (req, res) => {
     const modeli = await Model.find();
     const stakla = await Staklo.find();
 
-    res.render('new', { kupci, mjesta, materijaliVani, bojeVani, materijaliUnutra, bojeUnutra, aplikacije, modeli, stakla });
+    res.render('new', {
+      kupci, 
+      mjesta, 
+      materijaliVani, 
+      bojeVani, 
+      materijaliUnutra, 
+      bojeUnutra, 
+      aplikacije, 
+      modeli, 
+      stakla 
+    });
   } catch (error) {
-    console.error('Greška pri dohvaćanju podataka:', error.message);
+    console.error('Greška pri dohvaćanju podataka:', error);  // Log the full error
     res.status(500).send('Greška pri dohvaćanju podataka.');
   }
 });
@@ -192,16 +229,6 @@ app.post('/narudzbe', async (req, res) => {
   }
 });
 // Ensure you pass the kupci data to the view when rendering the edit page
-app.get('/narudzba/:id/edit', async (req, res) => {
-  try {
-    const narudzba = await Narudzba.findById(req.params.id).populate('kupac');
-    const kupci = await Kupac.find(); // Fetch all kupci
-    res.render('narudzba-edit', { narudzba, kupci });
-  } catch (error) {
-    console.error('Error fetching data for edit form:', error);
-    res.status(500).send('Error fetching order data');
-  }
-});
 
 // Route to display individual order details
 app.get('/narudzbe/:id', async (req, res) => {
@@ -329,13 +356,13 @@ app.get('/api/narudzbe', async (req, res) => {
 app.get('/narudzbe/:id/edit', async (req, res) => {
   try {
     const narudzba = await Narudzba.findById(req.params.id).populate('kupac');
-    
-    // Check the role and redirect based on the user's role
-    const userRole = req.session.user.role; // Assuming you have the user role saved in the session
+
+    // Assuming user role is saved in the session
+    const userRole = req.session.user.role;
 
     switch (userRole) {
       case 'prodaja':
-        return res.redirect('narudzba-edit', { narudzba });
+        return res.render('narudzba-edit', { narudzba });
       case 'cnc':
         return res.redirect(`/cnc`);
       case 'tehnicka-priprema':
@@ -344,7 +371,6 @@ app.get('/narudzbe/:id/edit', async (req, res) => {
         return res.redirect(`/aplikacija-wj/${narudzba._id}`);
       case 'farbara':
         return res.redirect(`/farbara/${narudzba._id}`);
-      case 'prodaja': // No redirection for prodaja, it stays the same
       default:
         return res.render('narudzba-edit', { narudzba });
     }
@@ -353,6 +379,7 @@ app.get('/narudzbe/:id/edit', async (req, res) => {
     res.status(500).send('Error fetching order data');
   }
 });
+
 
 
 
@@ -560,7 +587,7 @@ app.post('/sifrant-staklo', async (req, res) => {
 
 
 // Ruta za tehničke korisnike
-app.get('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
+app.get('/tehnicka-priprema', async (req, res) => {
   try {
     const narudzbas = await Narudzba.find()
       .populate('kupac')
@@ -582,7 +609,7 @@ app.get('/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, 
 
 
 
-app.put('/api/narudzba/:id/tehnicka-priprema', authorizeRole(['tehnicka-priprema']), async (req, res) => {
+app.put('/api/narudzba/:id/tehnicka-priprema', async (req, res) => {
   try {
     const { status, zavrseno } = req.body;
     const narudzba = await Narudzba.findById(req.params.id);
@@ -609,7 +636,7 @@ app.put('/api/narudzba/:id/tehnicka-priprema', authorizeRole(['tehnicka-priprema
 
 // Rute za HTML datoteke
 // Remove verifyToken middleware
-app.get('/cnc/:id', async (req, res) => {
+app.get('/cnc', async (req, res) => {
   try {
     const narudzba = await Narudzba.findById(req.params.id)
       .populate('kupac')
