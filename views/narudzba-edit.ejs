@@ -11,12 +11,12 @@
 
 <!-- Kupac dropdown -->
 <div class="form-group">
-    <label for="kupac">Kupac:</label>
-    <select id="kupac" name="kupac" required>
-      <% kupci.forEach(kupac => { %>
-        <option value="<%= kupac._id %>" <%= kupac._id.equals(narudzba.kupac._id) ? 'selected' : '' %>><%= kupac.naziv %></option>
-      <% }) %>
-    </select>
+  <label for="kupac">Kupac:</label>
+        <select id="kupac" name="kupac" required>
+          <% kupci.forEach(kupac => { %>
+              <option value="<%= kupac._id %>" <%= kupac._id.equals(narudzba.kupac._id) ? 'selected' : '' %>><%= kupac.naziv %></option>
+          <% }) %>
+        </select>
   </div>
 
     <!-- Materijal Vani -->

@@ -3,8 +3,7 @@ const router = express.Router();
 const authorizeRole = require('../middleware/authorizeRole');
 const Narudzba = require('../models/Narudzba');
 const Product = require('../models/Product');
-
-
+const Kupac = require('../models/Kupac'); 
 
 // Fetch all orders
 router.get('/', async (req, res) => {
@@ -74,6 +73,34 @@ router.post('/:id', authorizeRole(['prodaja', 'tehnicka-priprema', 'cnc']), asyn
         res.redirect('/narudzbe');
     } catch (err) {
         res.status(500).send('Greška pri ažuriranju narudžbe');
+    }
+});
+
+router.put('/:id', async (req, res) => {
+    try {
+        const narudzba = await Narudzba.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.redirect('/narudzbe');
+    } catch (error) {
+        res.status(500).send('Error updating the order');
+    }
+});
+
+
+router.get('/:id/edit', async (req, res) => {
+    try {
+        // Find the order by its ID
+        const narudzba = await Narudzba.findById(req.params.id).populate('kupac');
+        
+        // Find all customers to populate the dropdown
+        const kupci = await Kupac.find(); 
+
+        if (!narudzba) return res.status(404).send('Narudžba nije pronađena');
+        
+        // Pass both the order (narudzba) and customers (kupci) to the view
+        res.render('narudzba-edit', { narudzba, kupci });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Greška pri dohvaćanju narudžbe');
     }
 });
 
