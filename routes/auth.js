@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcrypt'); 
+const User = require('../models/User');
+
 // User registration
+
 router.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -16,28 +18,35 @@ router.post('/register', async (req, res) => {
 });
 
 // User login
-// User login
 router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
   try {
-    const { username, password } = req.body;
+    // Check if the user exists
     const user = await User.findOne({ username });
-
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+    // Compare password with hashed password in the database
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Set the session with user data after login
-    req.session.user = { id: user._id, username: user.username, role: user.role };
-    return res.json({ role: user.role });  // Send role to the client for redirection
+    // If passwords match, return success
+    return res.status(200).json({
+      message: 'Login successful',
+      user: {
+        username: user.username,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Login failed' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 // User logout
 router.post('/logout', (req, res) => {

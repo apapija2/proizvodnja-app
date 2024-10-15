@@ -23,9 +23,12 @@ const BojaUnutra = require('./models/BojaUnutra');
 const Aplikacija = require('./models/Aplikacija');
 const Model = require('./models/Model');
 const Staklo = require('./models/Staklo');
+const bcrypt = require('bcrypt');
+
+const User = require('./models/User');
 const authorizeRole = require('./middleware/authorizeRole');
 const session = require('express-session');
-const User = require('./models/User');
+
 // Inicijaliziraj Express aplikaciju
 const app = express();
 
